@@ -18,6 +18,7 @@ def get_pib():
     pib = pib[['D2C', 'V']].iloc[1:].reset_index(drop=True)
     pib.columns = ['Date', 'pib']
     pib = pib.assign(
+                        pib = lambda df: pd.to_numeric(df['pib'], errors='coerce'),
                         year = pib['Date'].str[:4],
                         month = pib['Date'].str[-2:].astype(int).multiply(3).astype(str).str.zfill(2),
                         Date = lambda df: df['year'] + df['month'],
