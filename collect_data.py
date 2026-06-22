@@ -2,20 +2,25 @@
 from tenacity import wait_fixed, retry, stop_after_attempt
 
 @retry(stop=stop_after_attempt(5))
-def get_bcb(serie:dict|None = None, start:str|None = None):
+def get_bcb(series: str| dict| None = None, start: str|None = None, **kwargs):
 
     import pandas as pd
     from bcb import sgs
 
-    series = pd.read_csv('series_spec.csv', sep=';') \
-                .query("variable != 'pib'") \
-                .astype({'sgs_code': int})
 
-    series = series.set_index('variable')['sgs_code'].to_dict()
+    if (isinstance(series, str)) and ('.csv' in series):
+
+        series = (
+                    pd.read_csv(series, sep=';')
+                    .query("source == 'sgs'")
+                    .astype({'code': int})
+                )
+
+        series = series.set_index('variable')['code'].to_dict()
     
     return sgs.get(series, start)
 
-get_bcb()
+# get_bcb('series_spec.csv')
 
 # %% get_pib
 
@@ -48,5 +53,48 @@ def get_pib():
             .set_index('Date')
 
     return pib 
+
+get_pib()
+
+# %% get_ipeadata
+
+@retry(stop=stop_after_attempt(5))
+def get_ipeadata(series: str| dict| None = None, start: str|None = None, **kwargs):
+    import pandas as pd
+    import ipeadatapy as ipea
+    
+    if (isinstance(series, str)) and ('.csv' in series):
+
+        series = (
+                    pd.read_csv(series, sep=';')
+                    .query("source == 'ipeadata'")
+                )
+
+        series = series.set_index('variable')['code'].to_dict()
+
+    ipea_dfs_list = []
+    for name, code in series.items():
+        temp = ipea.timeseries(series=code)
+        temp = temp.iloc[:, [-1]]
+        temp.columns = [name]
+
+        ipea_dfs_list.append(temp)
+
+    ipea_series = pd.concat(ipea_dfs_list, axis=1, join='outer')
+
+    return ipea_series
+
+
+get_ipeadata(
+    {
+        'cesta_basica_dieese': 'DIEESE12_CBSP12',
+        'caged_saldo_adj': 'CAGED12_SALDONAJU12',
+    
+    }
+
+).plot(subplots=True, figsize=(14,8))
+    
+
+
 
 # %%
