@@ -1,0 +1,50 @@
+# %%
+import os
+os.environ['X13PATH'] = r'/workspaces/PIB-Nowcast/src/x13as'
+
+import pandas as pd
+from statsmodels.tsa.x13 import x13_arima_analysis as x13
+
+
+# %%
+def seas_adj(base_df, specs_df, x13_path):
+
+    non_sa_vars = specs_df.query("seas_adj == 0")['variable'].to_list()
+
+    base_df_sa = base_df.copy(deep=True)
+
+    for col in non_sa_vars:
+        col_sa = x13(base_df_sa[[col]].dropna(), ).seasadj
+        # Para preservar índice
+        col_sa = base_df_sa.drop(columns=col).merge(col_sa, left_index=True, right_index=True, how='outer')[[col]]
+
+        base_df_sa[col] = col_sa
+
+    return base_df_sa
+
+# %%
+
+import os    
+
+from pathlib import Path
+
+project_root = Path("/workspaces/PIB-Nowcast")
+x13_path = project_root / "x13as"
+
+os.environ["X13PATH"] = str(x13_path)
+
+# %%
+if __name__ == '__main__':
+
+    
+    ### Especifica caminho e primeira data
+    path_series_spec = r'/workspaces/PIB-Nowcast/src/pib_nowcast/data/series_spec.csv'
+    specs_df = pd.read_csv(path_series_spec, sep=';')
+    start_date = '1996-01-01'
+
+    ## Dataset completo, última run
+    path_old_full_data = r'/workspaces/PIB-Nowcast/src/pib_nowcast/data/last_data_at_time.xlsx'
+    old_full_data = pd.read_excel(path_old_full_data, sheet_name='full_dataset', index_col='Date')
+
+    # Função definida acima pra ajustar a sazonalidade de múltiplas séries
+    seas_adj(old_full_data, specs_df, )

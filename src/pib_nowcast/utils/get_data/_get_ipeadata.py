@@ -1,7 +1,12 @@
+import pandas as pd
 from tenacity import wait_fixed, retry, stop_after_attempt
 
 @retry(stop=stop_after_attempt(5))
-def get_ipeadata(series: str| dict| None = None, start: str|None = None, **kwargs):
+def get_ipeadata(
+    series: str| dict| pd.DataFrame | None = None, 
+    start: str|None = None, 
+    **kwargs
+    ):
     import pandas as pd
     import ipeadatapy as ipea
     
@@ -11,6 +16,15 @@ def get_ipeadata(series: str| dict| None = None, start: str|None = None, **kwarg
                     pd.read_csv(series, sep=';')
                     .query("source == 'ipeadata'")
                 )
+        series = series.set_index('variable')['code'].to_dict()
+    
+    elif isinstance(series, pd.DataFrame):
+
+        series = (
+                    series
+                    .query("source == 'ipeadata'")
+                )
+
         series = series.set_index('variable')['code'].to_dict()
 
     if series == {}:

@@ -16,6 +16,9 @@ series_path = r'/workspaces/PIB-Nowcast/src/pib_nowcast/data/series_spec.csv'
 
 bcb_df = get_bcb(series=series_path, start='1996-01-01')
 
+bcb_df.iloc[-1, :] = np.nan
+bcb_df
+
 # %%
 ipea_df = get_ipeadata(series=series_path, start='1996-01-01')
 
@@ -36,4 +39,5 @@ with pd.ExcelWriter(Path('../data/last_data_at_time.xlsx')) as writer:
         .merge(
             pib_df, left_index=True, right_index=True, how='outer'
         )
-    ).to_excel(writer, sheet_name='full_dataset')
+        .to_excel(writer, sheet_name='full_dataset')
+    )
