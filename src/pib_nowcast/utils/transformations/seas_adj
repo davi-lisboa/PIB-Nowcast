@@ -29,7 +29,7 @@ import os
 from pathlib import Path
 
 project_root = Path("/workspaces/PIB-Nowcast")
-x13_path = project_root / "x13as"
+x13_path = project_root / "x13as" / "x13as"
 
 os.environ["X13PATH"] = str(x13_path)
 
