@@ -20,18 +20,13 @@ def get_data(specs_df: pd.DataFrame, start:str | None = None):
 
     return full_data
 
-# %%
-from pathlib import Path
-
-
-# src/pib_nowcast/data/series_spec.csv
 
 # %%
 if __name__ == '__main__':
+    from pib_nowcast.config import SERIES_SPEC
 
     ### Especifica caminho e primeira data
-    path_series_spec = r'/workspaces/PIB-Nowcast/src/pib_nowcast/data/series_spec.csv'
-    specs_df = pd.read_csv(path_series_spec, sep=';')
+    specs_df = pd.read_csv(SERIES_SPEC, sep=';')
     start_date = '1996-01-01'
 
-    get_data(specs_df, start_date)
+    get_data(specs_df, start_date)

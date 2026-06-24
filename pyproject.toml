@@ -5,6 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "arch>=7.0",
     "ipeadatapy>=0.1.9",
     "ipykernel>=7.3.0",
     "numpy>=2.4.6",
@@ -17,5 +18,9 @@ dependencies = [
     "tenacity>=9.1.4",
 ]
 
+[build-system]
+requires = ["setuptools>=75.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [tool.setuptools.packages.find]
-where = ["src"]
+where = ["."]
