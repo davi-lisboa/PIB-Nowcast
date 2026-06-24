@@ -13,6 +13,7 @@ from pib_nowcast.utils.transformations import (
     apply_transform_pipeline,
     make_stationary,
 )
+from pib_nowcast.utils.news import get_news_impacts, get_new_forecasts
 
 __all__ = [
     # config
@@ -36,4 +37,6 @@ __all__ = [
     "QUARTERLY_PIPELINE_IDS",
     "apply_transform_pipeline",
     "make_stationary",
+    "get_news_impacts",
+    "get_new_forecasts",
 ]

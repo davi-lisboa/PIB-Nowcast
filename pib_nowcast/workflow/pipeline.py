@@ -7,15 +7,19 @@ import datetime as dt
 
 from statsmodels.tsa.api import DynamicFactorMQ
 
-from pib_nowcast.config import SERIES_SPEC, LAST_DATA
+from pib_nowcast.config import SERIES_SPEC, LAST_DATA, DATA_DIR
 from pib_nowcast.utils.get_data import get_data
 from pib_nowcast.utils.transformations import seas_adj, make_stationary
+from pib_nowcast.utils.news import get_news_impacts, get_new_forecasts
 
 # %%
 
 ### Especifica caminho e primeira data
 specs_df = pd.read_csv(SERIES_SPEC, sep=';')
 start_date = '1996-01-01'
+
+### Especificação de datas
+today = dt.date.today()
 
 # %% Coletas
 
@@ -60,7 +64,7 @@ old_model = DynamicFactorMQ(
     endog = old_full_data_stat,
     k_endog_monthly = specs_df.query("frequency == 'Monthly' ").shape[0],
     factors = factors,
-    factor_orders = 4,
+    factor_orders = 3,
     # endog_qu
 
 )
@@ -76,3 +80,33 @@ new_model = old_model_res.apply(
     k_endog_monthly = specs_df.query("frequency == 'Monthly' ").shape[0],
 
 )
+
+# TO-DOs
+# Ajustar transformações para M/M-like
+# gerar primeiro excel/histórico de nowcasts
+
+# separar datas relevantes
+last_pib_date_timestamp = old_full_data['pib'].last_valid_index()
+next_pib_quarter_timestamp = last_pib_date_timestamp + pd.DateOffset(months=3)
+
+# Estimar news
+news = new_model.news(
+                        comparison=old_model_res, 
+                        impacted_variable='pib', 
+                        impact_date=next_pib_quarter_timestamp.strftime('%Y-%m-%d')
+                    )
+
+
+## -> Salvar impactos no histórico
+get_news_impacts(news, save_to=DATA_DIR / 'news_impacts.xlsx')
+
+
+## -> Salvar novos forecasts no histórico
+get_new_forecasts(
+    news=news, 
+    new_model_res=new_model, 
+    last_pib_date_timestamp=last_pib_date_timestamp, 
+    next_pib_quarter_timestamp=next_pib_quarter_timestamp, 
+    save_to=DATA_DIR / 'forecasts.xlsx'
+)
+
