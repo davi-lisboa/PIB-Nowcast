@@ -6,4 +6,5 @@ from .transform_pipeline import (
     MONTHLY_PIPELINE_IDS,
     QUARTERLY_PIPELINE_IDS,
     apply_transform_pipeline,
+    make_stationary,
 )

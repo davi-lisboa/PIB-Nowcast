@@ -148,3 +148,44 @@ def apply_transform_pipeline(
 
     except Exception:
         return None
+
+
+def make_stationary(df: pd.DataFrame, specs_df: pd.DataFrame) -> pd.DataFrame:
+    """Aplica as transformações de estacionaridade em todas as colunas do DataFrame.
+    
+    A transformação adequada para cada série é extraída da coluna ``transformation_id``
+    do DataFrame ``specs_df``.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame contendo as séries temporais originais ou sazonalmente ajustadas.
+    specs_df : pd.DataFrame
+        DataFrame contendo as especificações das séries, incluindo a coluna
+        ``transformation_id`` correspondente ao pipeline de cada variável.
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame com todas as séries transformadas e alinhadas temporalmente.
+    """
+    transformed_series = []
+    
+    for col in df.columns:
+        if col not in specs_df['variable'].values:
+            continue
+            
+        pipe_id = specs_df.loc[specs_df['variable'] == col, 'transformation_id'].iloc[0]
+        
+        # Ignora se não houver transformação definida (-1, nulo, etc.)
+        if pd.isna(pipe_id) or pipe_id < 0:
+            continue
+            
+        s_transformed = apply_transform_pipeline(df[col], int(pipe_id))
+        if s_transformed is not None:
+            transformed_series.append(s_transformed)
+
+    if not transformed_series:
+        return pd.DataFrame(index=df.index)
+
+    return pd.concat(transformed_series, axis=1)

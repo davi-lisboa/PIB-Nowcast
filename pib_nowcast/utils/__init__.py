@@ -10,6 +10,7 @@ from pib_nowcast.utils.transformations import (
     MONTHLY_PIPELINE_IDS,
     QUARTERLY_PIPELINE_IDS,
     apply_transform_pipeline,
+    make_stationary,
 )
 
 __all__ = [
@@ -25,4 +26,5 @@ __all__ = [
     "MONTHLY_PIPELINE_IDS",
     "QUARTERLY_PIPELINE_IDS",
     "apply_transform_pipeline",
+    "make_stationary",
 ]

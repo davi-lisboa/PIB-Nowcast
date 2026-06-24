@@ -9,7 +9,7 @@ from statsmodels.tsa.api import DynamicFactorMQ
 
 from pib_nowcast.config import SERIES_SPEC, LAST_DATA
 from pib_nowcast.utils.get_data import get_data
-from pib_nowcast.utils.transformations import seas_adj
+from pib_nowcast.utils.transformations import seas_adj, make_stationary
 
 # %%
 
@@ -38,10 +38,12 @@ else:
 
 # %% Tratamentos 
 ## -> Ajuste sazonal
+old_full_data_sa = seas_adj(old_full_data, specs_df)
 new_full_data_sa = seas_adj(new_full_data, specs_df)
-  
-## -> Estacionarização
 
+## -> Estacionarização
+old_full_data_stat = make_stationary(old_full_data_sa, specs_df)
+new_full_data_stat = make_stationary(new_full_data_sa, specs_df)
 
 # %%
 import ast
@@ -55,7 +57,7 @@ factors = {
 }
 
 old_model = DynamicFactorMQ(
-    endog = old_full_data,
+    endog = old_full_data_stat,
     k_endog_monthly = specs_df.query("frequency == 'Monthly' ").shape[0],
     factors = factors,
     factor_orders = 4,
@@ -70,7 +72,7 @@ print(old_model_res.summary())
 # %%
 
 new_model = old_model_res.apply(
-    endog = new_full_data,
+    endog = new_full_data_stat,
     k_endog_monthly = specs_df.query("frequency == 'Monthly' ").shape[0],
 
 )
