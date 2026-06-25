@@ -46,6 +46,16 @@ def _sdiff4(s: pd.Series) -> pd.Series:
     return s.diff(4).dropna()
 
 
+def _mom_pct(s: pd.Series) -> pd.Series:
+    """Variação percentual MoM."""
+    return s.pct_change(1).dropna() * 100
+
+
+def _qoq_pct(s: pd.Series) -> pd.Series:
+    """Variação percentual QoQ."""
+    return s.pct_change(1).dropna() * 100
+
+
 def _yoy_pct(s: pd.Series) -> pd.Series:
     """Variação percentual YoY (4 trimestres). Específica para PIB."""
     return s.pct_change(4).dropna() * 100
@@ -77,12 +87,15 @@ PIPELINE_REGISTRY: dict[int, tuple[str, list, bool]] = {
     10: ("log→sdiff12",        [_log, _sdiff12],             True),
     11: ("log→sdiff12→diff",   [_log, _sdiff12, _diff],      True),
     12: ("boxcox→sdiff12→diff", [_boxcox, _sdiff12, _diff],  True),
+    13: ("mom_pct",            [_mom_pct],                   False),
+    
     # ── Trimestrais ──
-    13: ("yoy_pct",            [_yoy_pct],                   False),
-    14: ("sdiff4",             [_sdiff4],                    False),
-    15: ("sdiff4→diff",        [_sdiff4, _diff],             False),
-    16: ("log→sdiff4",         [_log, _sdiff4],              True),
-    17: ("log→sdiff4→diff",    [_log, _sdiff4, _diff],       True),
+    14: ("qoq_pct",            [_qoq_pct],                   False),
+    15: ("yoy_pct",            [_yoy_pct],                   False),
+    16: ("sdiff4",             [_sdiff4],                    False),
+    17: ("sdiff4→diff",        [_sdiff4, _diff],             False),
+    18: ("log→sdiff4",         [_log, _sdiff4],              True),
+    19: ("log→sdiff4→diff",    [_log, _sdiff4, _diff],       True),
 }
 
 # Mapeamento nome → id (útil para lookups a partir do nome legível)
@@ -91,8 +104,8 @@ PIPELINE_NAME_TO_ID: dict[str, int] = {
 }
 
 # IDs válidos para cada frequência
-MONTHLY_PIPELINE_IDS: list[int] = list(range(0, 13))
-QUARTERLY_PIPELINE_IDS: list[int] = [0, 1, 2, 3, 13, 14, 15, 16, 17]
+MONTHLY_PIPELINE_IDS: list[int] = list(range(0, 13+1))
+QUARTERLY_PIPELINE_IDS: list[int] = [0, 1, 2, 3, 14, 15, 16, 17, 18, 19]
 
 
 def apply_transform_pipeline(
