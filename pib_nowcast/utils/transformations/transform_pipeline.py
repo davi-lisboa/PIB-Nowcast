@@ -60,6 +60,10 @@ def _yoy_pct(s: pd.Series) -> pd.Series:
     """Variação percentual YoY (4 trimestres). Específica para PIB."""
     return s.pct_change(4).dropna() * 100
 
+def _multiply_100(s: pd.Series) -> pd.Series:
+    """Multiplica a série por 100."""
+    return s * 100
+
 
 # ── Registro de pipelines ──────────────────────────────────────────────────
 #
@@ -77,15 +81,15 @@ PIPELINE_REGISTRY: dict[int, tuple[str, list, bool]] = {
     0:  ("nível",              [],                           False),
     1:  ("diff",               [_diff],                      False),
     2:  ("log",                [_log],                       True),
-    3:  ("log→diff",           [_log, _diff],                True),
+    3:  ("log→diff",           [_log, _diff, _multiply_100], True),
     4:  ("boxcox",             [_boxcox],                    True),
     5:  ("boxcox→diff",        [_boxcox, _diff],             True),
     6:  ("yeojohnson",         [_yeojohnson],                False),
     7:  ("yeojohnson→diff",    [_yeojohnson, _diff],         False),
     8:  ("sdiff12",            [_sdiff12],                   False),
     9:  ("sdiff12→diff",       [_sdiff12, _diff],            False),
-    10: ("log→sdiff12",        [_log, _sdiff12],             True),
-    11: ("log→sdiff12→diff",   [_log, _sdiff12, _diff],      True),
+    10: ("log→sdiff12",        [_log, _sdiff12, _multiply_100], True),
+    11: ("log→sdiff12→diff",   [_log, _sdiff12, _multiply_100, _diff], True),
     12: ("boxcox→sdiff12→diff", [_boxcox, _sdiff12, _diff],  True),
     13: ("mom_pct",            [_mom_pct],                   False),
     
@@ -94,8 +98,8 @@ PIPELINE_REGISTRY: dict[int, tuple[str, list, bool]] = {
     15: ("yoy_pct",            [_yoy_pct],                   False),
     16: ("sdiff4",             [_sdiff4],                    False),
     17: ("sdiff4→diff",        [_sdiff4, _diff],             False),
-    18: ("log→sdiff4",         [_log, _sdiff4],              True),
-    19: ("log→sdiff4→diff",    [_log, _sdiff4, _diff],       True),
+    18: ("log→sdiff4",         [_log, _sdiff4, _multiply_100], True),
+    19: ("log→sdiff4→diff",    [_log, _sdiff4, _multiply_100, _diff], True),
 }
 
 # Mapeamento nome → id (útil para lookups a partir do nome legível)

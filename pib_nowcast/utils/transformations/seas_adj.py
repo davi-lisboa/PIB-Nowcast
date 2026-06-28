@@ -1,5 +1,7 @@
 # %%
 import logging
+import os
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import pandas as pd
 from statsmodels.tsa.x13 import x13_arima_analysis
@@ -61,6 +63,84 @@ def seas_adj(
 
         except Exception:
             logger.exception(f"Erro no ajuste sazonal da série '{col}', mantendo original.")
+
+    return base_df_sa
+
+
+def _process_single_series(col: str, series: pd.DataFrame, x13_path: str) -> tuple[str, pd.Series | None]:
+    """Função auxiliar para processar uma única série no X-13 ARIMA."""
+    if series.empty or len(series) < 36:
+        logger.warning(f"Coluna '{col}' tem {len(series)} obs (mínimo ~36 para X-13), pulando.")
+        return col, None
+
+    try:
+        sa_result = x13_arima_analysis(
+            endog=series,
+            trading=True,
+            x12path=x13_path,
+        ).seasadj
+        return col, sa_result
+    except Exception:
+        logger.exception(f"Erro no ajuste sazonal da série '{col}', mantendo original.")
+        return col, None
+
+
+def seas_adj_parallel(
+        base_df: pd.DataFrame,
+        specs_df: pd.DataFrame,
+        x13_path: str | None = None,
+        max_workers: int | None = None,
+) -> pd.DataFrame:
+    """Aplica ajuste sazonal X-13 ARIMA às séries marcadas com seas_adj == 0 de forma paralela.
+
+    Parameters
+    ----------
+    base_df : pd.DataFrame
+        DataFrame com as séries temporais (índice datetime).
+    specs_df : pd.DataFrame
+        Especificações das séries; deve conter colunas 'variable' e 'seas_adj'.
+    x13_path : str | None
+        Caminho para o executável do X-13. Se ``None``, usa ``X13_PATH`` do config.
+    max_workers: int | None
+        Número máximo de threads a serem utilizadas no pool de execução.
+        Por padrão, utiliza min(32, os.cpu_count() + 4).
+
+    Returns
+    -------
+    pd.DataFrame
+        Cópia de ``base_df`` com as séries dessazonalizadas.
+    """
+    if x13_path is None:
+        x13_path = str(X13_PATH)
+
+    non_sa_vars = specs_df.query("seas_adj == 0")["variable"].to_list()
+    base_df_sa = base_df.copy(deep=True)
+
+    # Coleta todas as séries válidas para despachar
+    jobs = {}
+    for col in non_sa_vars:
+        if col not in base_df_sa.columns:
+            logger.warning(f"Coluna '{col}' não encontrada no DataFrame, pulando.")
+            continue
+            
+        series = base_df_sa[[col]].dropna()
+        jobs[col] = series
+
+    # Se não houver max_workers, usa o default apropriado do ThreadPoolExecutor
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        futures = {
+            executor.submit(_process_single_series, col, series, x13_path): col
+            for col, series in jobs.items()
+        }
+
+        for future in as_completed(futures):
+            col = futures[future]
+            try:
+                processed_col, sa_result = future.result()
+                if sa_result is not None:
+                    base_df_sa[processed_col] = sa_result.reindex(base_df_sa.index)
+            except Exception as e:
+                logger.error(f"Erro inesperado na thread da coluna '{col}': {e}")
 
     return base_df_sa
 

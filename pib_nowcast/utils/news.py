@@ -57,6 +57,7 @@ def get_new_forecasts(
         .assign(
             update_date=today,
             estimate='predicted_mean',
+            type = 'qoq'
             )
         .rename(columns={
             'impact date': 'reference date',
@@ -86,7 +87,8 @@ def get_new_forecasts(
         .assign(
             **{
                 'impacted variable': 'pib',
-                'update_date': today
+                'update_date': today,
+                'type': 'qoq'
             }
         )
     )

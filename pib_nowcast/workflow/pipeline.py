@@ -41,6 +41,10 @@ else:
     print('Houve atualização/revisão nos dados, prosseguindo com o processo.')
 
 # %% Tratamentos 
+
+## -> Deflacionar valores
+# WIP
+
 ## -> Ajuste sazonal
 old_full_data_sa = seas_adj(old_full_data, specs_df)
 new_full_data_sa = seas_adj(new_full_data, specs_df)
@@ -55,10 +59,10 @@ import ast
 # Extrai os fatores especificados e corrige o tipo dos dados
 factors = specs_df.set_index('variable')['factors'].to_dict()
 factors = {
-    k: ast.literal_eval(v) if isinstance(v, str) 
-    else v
-    for k, v in factors.items()
-}
+            k: ast.literal_eval(v) if isinstance(v, str) 
+            else v
+            for k, v in factors.items()
+        }
 
 old_model = DynamicFactorMQ(
     endog = old_full_data_stat,
