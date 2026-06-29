@@ -1,4 +1,4 @@
-from .seas_adj import seas_adj
+from .seas_adj import seas_adj, seas_adj_parallel, seas_adj_stl, seas_adj_stl_parallel
 from .stationarity import stationarity_tests, is_stationary
 from .transform_pipeline import (
     PIPELINE_REGISTRY,
