@@ -42,8 +42,9 @@ def get_new_forecasts(
     new_model_res, 
     last_pib_date_timestamp, 
     next_pib_quarter_timestamp, 
+    historical_pib_index: pd.DataFrame,
     save_to: str | None = None
-) -> None:
+) -> pd.DataFrame:
     """Extrai as projeções pontuais (mean) e intervalares (conf_int) e as salva historicamente."""
     today = dt.date.today()
     
@@ -80,6 +81,7 @@ def get_new_forecasts(
         .reset_index()
         .rename(columns={
             'index': 'reference date',
+            'Date': 'reference date',
             'lower pib': 'lower',
             'upper pib': 'upper',
         })
@@ -93,8 +95,36 @@ def get_new_forecasts(
         )
     )
 
+    # Calcula projeção de Índice e YoY%
+    qoq_mean = new_point_forecasts['forecast'].iloc[0]
+    qoq_lower = new_interval_forecasts.loc[new_interval_forecasts['estimate'] == 'lower', 'forecast'].iloc[0]
+    qoq_upper = new_interval_forecasts.loc[new_interval_forecasts['estimate'] == 'upper', 'forecast'].iloc[0]
+    
+    # Índice histórico
+    i_t = historical_pib_index['pib'].iloc[-1]
+    i_t_minus_3 = historical_pib_index['pib'].iloc[-4]
+    
+    # Novas projeções de Índice
+    index_mean = i_t * (1 + qoq_mean / 100)
+    index_lower = i_t * (1 + qoq_lower / 100)
+    index_upper = i_t * (1 + qoq_upper / 100)
+    
+    # Novas projeções de YoY%
+    yoy_mean = (index_mean / i_t_minus_3 - 1) * 100
+    yoy_lower = (index_lower / i_t_minus_3 - 1) * 100
+    yoy_upper = (index_upper / i_t_minus_3 - 1) * 100
+    
+    new_metrics = pd.DataFrame([
+        {'reference date': next_pib_quarter_timestamp, 'impacted variable': 'pib', 'forecast': index_mean, 'update_date': today, 'estimate': 'predicted_mean', 'type': 'index'},
+        {'reference date': next_pib_quarter_timestamp, 'impacted variable': 'pib', 'forecast': index_lower, 'update_date': today, 'estimate': 'lower', 'type': 'index'},
+        {'reference date': next_pib_quarter_timestamp, 'impacted variable': 'pib', 'forecast': index_upper, 'update_date': today, 'estimate': 'upper', 'type': 'index'},
+        {'reference date': next_pib_quarter_timestamp, 'impacted variable': 'pib', 'forecast': yoy_mean, 'update_date': today, 'estimate': 'predicted_mean', 'type': 'yoy'},
+        {'reference date': next_pib_quarter_timestamp, 'impacted variable': 'pib', 'forecast': yoy_lower, 'update_date': today, 'estimate': 'lower', 'type': 'yoy'},
+        {'reference date': next_pib_quarter_timestamp, 'impacted variable': 'pib', 'forecast': yoy_upper, 'update_date': today, 'estimate': 'upper', 'type': 'yoy'},
+    ])
+
     # Unifica as estimativas pontuais e intervalares num mesmo formato tabular
-    all_forecasts_df = pd.concat([new_point_forecasts, new_interval_forecasts], ignore_index=True)
+    all_forecasts_df = pd.concat([new_point_forecasts, new_interval_forecasts, new_metrics], ignore_index=True)
 
     if save_to:
         if os.path.exists(save_to):
@@ -105,4 +135,4 @@ def get_new_forecasts(
         else:
             all_forecasts_df.to_excel(save_to, index=False)
             
-    return None
+    return all_forecasts_df

@@ -9,7 +9,7 @@ from statsmodels.tsa.api import DynamicFactorMQ
 
 from pib_nowcast.config import SERIES_SPEC, LAST_DATA, DATA_DIR
 from pib_nowcast.utils.get_data import get_data
-from pib_nowcast.utils.transformations import seas_adj, make_stationary
+from pib_nowcast.utils.transformations import seas_adj_stl_parallel, make_stationary
 from pib_nowcast.utils.news import get_news_impacts, get_new_forecasts
 
 # %%
@@ -46,14 +46,14 @@ else:
 # WIP
 
 ## -> Ajuste sazonal
-old_full_data_sa = seas_adj(old_full_data, specs_df)
-new_full_data_sa = seas_adj(new_full_data, specs_df)
+old_full_data_sa = seas_adj_stl_parallel(old_full_data, specs_df)
+new_full_data_sa = seas_adj_stl_parallel(new_full_data, specs_df)
 
 ## -> Estacionarização
 old_full_data_stat = make_stationary(old_full_data_sa, specs_df)
 new_full_data_stat = make_stationary(new_full_data_sa, specs_df)
 
-# %%
+# %% Estimação do modelo com dados antigos
 import ast
 
 # Extrai os fatores especificados e corrige o tipo dos dados
@@ -77,7 +77,7 @@ old_model_res = old_model.fit()
 
 print(old_model_res.summary())
 
-# %%
+# %% Estimação do modelo com novos dados
 
 new_model = old_model_res.apply(
     endog = new_full_data_stat,
@@ -85,32 +85,47 @@ new_model = old_model_res.apply(
 
 )
 
-# TO-DOs
-# Ajustar transformações para M/M-like
-# gerar primeiro excel/histórico de nowcasts
+# %% Separar datas e dfs relevantes 
 
-# separar datas relevantes
-last_pib_date_timestamp = old_full_data['pib'].last_valid_index()
+## Caso onde houve atualização do PIB
+if old_full_data['pib'].last_valid_index() < new_full_data['pib'].last_valid_index():
+    pib_series = new_full_data[['pib']].dropna()
+
+## Caso onde não houve atualização do PIB
+else:
+    pib_series = old_full_data[['pib']].dropna()
+
+last_pib_date_timestamp = pib_series.last_valid_index()
+
+# Definir próximo trimestre do PIB
 next_pib_quarter_timestamp = last_pib_date_timestamp + pd.DateOffset(months=3)
 
-# Estimar news
+
+# %% Estimar news
 news = new_model.news(
                         comparison=old_model_res, 
                         impacted_variable='pib', 
-                        impact_date=next_pib_quarter_timestamp.strftime('%Y-%m-%d')
+                        impact_date=next_pib_quarter_timestamp.strftime('%Y-%m-%d'),
+                        # tolerance=1e-5,
+                        comparison_type='previous',
                     )
 
+
+# %% Impactos e forecasts
 
 ## -> Salvar impactos no histórico
 get_news_impacts(news, save_to=DATA_DIR / 'news_impacts.xlsx')
 
 
 ## -> Salvar novos forecasts no histórico
-get_new_forecasts(
+forecasts_df = get_new_forecasts(
     news=news, 
     new_model_res=new_model, 
     last_pib_date_timestamp=last_pib_date_timestamp, 
     next_pib_quarter_timestamp=next_pib_quarter_timestamp, 
+    historical_pib_index=pib_series,
     save_to=DATA_DIR / 'forecasts.xlsx'
 )
 
+
+# %%
