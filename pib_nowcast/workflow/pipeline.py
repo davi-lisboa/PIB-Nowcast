@@ -1,5 +1,7 @@
 # %% Bibliotecas
 import sys
+import gc
+import ast
 
 import pandas as pd
 import numpy as np
@@ -53,45 +55,11 @@ new_full_data_sa = seas_adj_stl_parallel(new_full_data, specs_df)
 old_full_data_stat = make_stationary(old_full_data_sa, specs_df)
 new_full_data_stat = make_stationary(new_full_data_sa, specs_df)
 
-# %% Estimação do modelo com dados antigos
-import ast
-
-# Extrai os fatores especificados e corrige o tipo dos dados
-factors = specs_df.set_index('variable')['factors'].to_dict()
-factors = {
-            k: ast.literal_eval(v) if isinstance(v, str) 
-            else v
-            for k, v in factors.items()
-        }
-
-old_model = DynamicFactorMQ(
-    endog = old_full_data_stat,
-    k_endog_monthly = specs_df.query("frequency == 'Monthly' ").shape[0],
-    factors = factors,
-    factor_orders = 3,
-    # endog_qu
-
-)
-
-old_model_res = old_model.fit()
-
-print(old_model_res.summary())
-
-# %% Estimação do modelo com novos dados
-
-new_model = old_model_res.apply(
-    endog = new_full_data_stat,
-    k_endog_monthly = specs_df.query("frequency == 'Monthly' ").shape[0],
-
-)
-
-# %% Separar datas e dfs relevantes 
+# %% Separar datas e dfs relevantes do PIB (Antes da Limpeza de Memória)
 
 ## Caso onde houve atualização do PIB
 if old_full_data['pib'].last_valid_index() < new_full_data['pib'].last_valid_index():
     pib_series = new_full_data[['pib']].dropna()
-
-## Caso onde não houve atualização do PIB
 else:
     pib_series = old_full_data[['pib']].dropna()
 
@@ -100,15 +68,47 @@ last_pib_date_timestamp = pib_series.last_valid_index()
 # Definir próximo trimestre do PIB
 next_pib_quarter_timestamp = last_pib_date_timestamp + pd.DateOffset(months=3)
 
+# %% Limpeza de Memória
+del old_full_data, new_full_data, old_full_data_sa, new_full_data_sa
+gc.collect()
+
+# %% Estimação do modelo com dados antigos
+
+# Extrai os fatores especificados e corrige o tipo dos dados
+factors = specs_df.set_index('variable')['factors'].to_dict()
+factors = {
+    k: ast.literal_eval(v) if isinstance(v, str) else v
+    for k, v in factors.items()
+}
+
+old_model = DynamicFactorMQ(
+    endog = old_full_data_stat,
+    k_endog_monthly = specs_df.query("frequency == 'Monthly' ").shape[0],
+    factors = factors,
+    factor_orders = 3,
+    # endog_qu
+
+).fit()
+
+print(old_model.summary())
+
+# %% Estimação do modelo com novos dados
+
+new_model = old_model.apply(
+    endog = new_full_data_stat,
+    k_endog_monthly = specs_df.query("frequency == 'Monthly' ").shape[0],
+
+)
 
 # %% Estimar news
 news = new_model.news(
-                        comparison=old_model_res, 
-                        impacted_variable='pib', 
-                        impact_date=next_pib_quarter_timestamp.strftime('%Y-%m-%d'),
-                        # tolerance=1e-5,
-                        comparison_type='previous',
-                    )
+    comparison=old_model, 
+    impacted_variable='pib', 
+    impact_date=next_pib_quarter_timestamp.strftime('%Y-%m-%d'),
+    # tolerance=1e-5,
+    comparison_type='previous',
+    revisions_details_start=-12  # Limita as matrizes de revisões apenas para os últimos 12 meses
+)
 
 
 # %% Impactos e forecasts

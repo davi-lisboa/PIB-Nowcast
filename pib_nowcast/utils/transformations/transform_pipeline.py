@@ -10,7 +10,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 from scipy.stats import boxcox, yeojohnson
-
+import warnings
 
 # ── Funções elementares de transformação ────────────────────────────────────
 
@@ -201,6 +201,11 @@ def make_stationary(df: pd.DataFrame, specs_df: pd.DataFrame) -> pd.DataFrame:
         s_transformed = apply_transform_pipeline(df[col], int(pipe_id))
         if s_transformed is not None:
             transformed_series.append(s_transformed)
+        else:
+            warnings.warn(
+                f"A série '{col}' foi descartada na estacionarização (pipeline_id={pipe_id}). "
+                f"Possíveis causas: dados insuficientes ou valores <= 0 em transformações log/boxcox."
+            )
 
     if not transformed_series:
         return pd.DataFrame(index=df.index)
