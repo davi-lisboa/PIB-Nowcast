@@ -85,7 +85,7 @@ old_model = DynamicFactorMQ(
     endog = old_full_data_stat,
     k_endog_monthly = specs_df.query("frequency == 'Monthly' ").shape[0],
     factors = factors,
-    factor_orders = 3,
+    factor_orders = 1,
     # endog_qu
 
 ).fit()
