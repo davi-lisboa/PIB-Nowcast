@@ -109,7 +109,7 @@ news = new_model.news(
     comparison_type='previous',
     revisions_details_start=-12  # Limita as matrizes de revisões apenas para os últimos 12 meses
 )
-
+print(news.summary())
 
 # %% Impactos e forecasts
 
