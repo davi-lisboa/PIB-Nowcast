@@ -87,10 +87,10 @@ old_model = DynamicFactorMQ(
     k_endog_monthly = specs_df.query("frequency == 'Monthly' ").shape[0],
     factors = factors,
     factor_multiplicities={ 'Global': 2 },
-    factor_orders = {
-        'Global': 4,
-        ('Output', 'Employment', 'Prices', 'Sentiment', 'Credit'): 4
-    }
+    # factor_orders = {
+    #     'Global': 4,
+    #     ('Output', 'Employment', 'Prices', 'Sentiment', 'Credit'): 1
+    # }
 ).fit()
 
 print(old_model.summary())
