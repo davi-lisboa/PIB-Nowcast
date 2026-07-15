@@ -11,7 +11,7 @@ from statsmodels.tsa.api import DynamicFactorMQ
 
 from pib_nowcast.config import SERIES_SPEC, LAST_DATA, DATA_DIR
 from pib_nowcast.utils.get_data import get_data
-from pib_nowcast.utils.transformations import seas_adj_stl_parallel, make_stationary
+from pib_nowcast.utils.transformations import seas_adj_stl_parallel, make_stationary, deflate
 from pib_nowcast.utils.news import get_news_impacts, get_new_forecasts
 
 # %%
@@ -44,12 +44,13 @@ else:
 
 # %% Tratamentos 
 
-## -> Deflacionar valores
-# WIP
+## -> Deflacionar valores nominais
+old_full_data_defl = deflate(old_full_data, specs_df)
+new_full_data_defl = deflate(new_full_data, specs_df)
 
 ## -> Ajuste sazonal
-old_full_data_sa = seas_adj_stl_parallel(old_full_data, specs_df)
-new_full_data_sa = seas_adj_stl_parallel(new_full_data, specs_df)
+old_full_data_sa = seas_adj_stl_parallel(old_full_data_defl, specs_df)
+new_full_data_sa = seas_adj_stl_parallel(new_full_data_defl, specs_df)
 
 ## -> Estacionarização
 old_full_data_stat = make_stationary(old_full_data_sa, specs_df)
@@ -85,9 +86,11 @@ old_model = DynamicFactorMQ(
     endog = old_full_data_stat,
     k_endog_monthly = specs_df.query("frequency == 'Monthly' ").shape[0],
     factors = factors,
-    factor_orders = 1,
-    # endog_qu
-
+    factor_multiplicities={ 'Global': 2 },
+    factor_orders = {
+        'Global': 4,
+        ('Output', 'Employment', 'Prices', 'Sentiment', 'Credit'): 4
+    }
 ).fit()
 
 print(old_model.summary())

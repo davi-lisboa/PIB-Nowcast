@@ -8,3 +8,4 @@ from .transform_pipeline import (
     apply_transform_pipeline,
     make_stationary,
 )
+from .deflate import deflate

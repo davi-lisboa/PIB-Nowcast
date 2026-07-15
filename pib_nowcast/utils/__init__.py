@@ -11,6 +11,7 @@ from pib_nowcast.utils.transformations import (
     QUARTERLY_PIPELINE_IDS,
     apply_transform_pipeline,
     make_stationary,
+    deflate,
 )
 from pib_nowcast.utils.news import get_news_impacts, get_new_forecasts
 
@@ -28,6 +29,7 @@ __all__ = [
     "QUARTERLY_PIPELINE_IDS",
     "apply_transform_pipeline",
     "make_stationary",
+    "deflate",
     "get_news_impacts",
     "get_new_forecasts",
 ]
