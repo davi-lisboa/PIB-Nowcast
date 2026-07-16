@@ -10,7 +10,7 @@ import datetime as dt
 from statsmodels.tsa.api import DynamicFactorMQ
 
 from pib_nowcast.config import SERIES_SPEC, LAST_DATA, DATA_DIR
-from pib_nowcast.utils.get_data import get_data
+from pib_nowcast.utils.get_data import get_data, get_data_parallel
 from pib_nowcast.utils.transformations import seas_adj_stl_parallel, make_stationary, deflate
 from pib_nowcast.utils.news import get_news_impacts, get_new_forecasts
 
@@ -29,9 +29,7 @@ today = dt.date.today()
 old_full_data = pd.read_excel(LAST_DATA, sheet_name='full_dataset', index_col='Date')
 
 ## Coleta dados mais recentes
-
-### Junta tudo num df só
-new_full_data = get_data(specs_df, start_date)
+new_full_data = get_data_parallel(specs_df, start_date)
 
 # %% Comparação
 
