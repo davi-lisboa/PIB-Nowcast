@@ -68,6 +68,10 @@ def _multiply_100(s: pd.Series) -> pd.Series:
     """Multiplica a série por 100."""
     return s * 100
 
+def _qoq_annualized(s: pd.Series) -> pd.Series:
+    """Variação percentual QoQ anualizada."""
+    return s.pct_change(1).add(1).pow(4).sub(1).dropna() * 100
+
 
 # ── Registro de pipelines ──────────────────────────────────────────────────
 #
@@ -105,6 +109,7 @@ PIPELINE_REGISTRY: dict[int, tuple[str, list, bool]] = {
     18: ("sdiff4→diff",        [_sdiff4, _diff],             False),
     19: ("log→sdiff4",         [_log, _sdiff4, _multiply_100], True),
     20: ("log→sdiff4→diff",    [_log, _sdiff4, _multiply_100, _diff], True),
+    21: ("qoq_annualized",     [_qoq_annualized],           False),
 }
 
 # Mapeamento nome → id (útil para lookups a partir do nome legível)
@@ -114,7 +119,7 @@ PIPELINE_NAME_TO_ID: dict[str, int] = {
 
 # IDs válidos para cada frequência
 MONTHLY_PIPELINE_IDS: list[int] = list(range(0, 14+1))
-QUARTERLY_PIPELINE_IDS: list[int] = [0, 1, 2, 3, 15, 16, 17, 18, 19, 20]
+QUARTERLY_PIPELINE_IDS: list[int] = [0, 1, 2, 3, 15, 16, 17, 18, 19, 20, 21]
 
 
 def apply_transform_pipeline(
