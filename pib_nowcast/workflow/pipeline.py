@@ -94,8 +94,8 @@ old_model = DynamicFactorMQ(
     factors = factors,
     # factor_multiplicities={ 'Global': 2 },
     factor_orders = {
-        'Global': 1,
-        ('Output', 'Employment', 'Prices', 'Sentiment', 'Credit'): 1
+        'Global': 3,
+        ('Output', 'Employment', 'Prices', 'Sentiment', 'Credit'): 2
     }
 ).fit(
     disp=True,
@@ -113,22 +113,13 @@ new_model = old_model.apply(
 
 )
 
-
-# %% Estimar news
-news = new_model.news(
-    comparison=old_model, 
-    impacted_variable='pib', 
-    impact_date=next_pib_quarter_timestamp.strftime('%Y-%m-%d'),
-    # tolerance=1e-5,
-    comparison_type='previous',
-    revisions_details_start=-12  # Limita as matrizes de revisões apenas para os últimos 12 meses
-)
-print(news.summary())
-
-# %%
+# %% Plot dos fatores
+# Plot dos fatores
 
 filtered_factors = new_model.factors['filtered']
 smoothed_factors = new_model.factors['smoothed']
+
+# start, end = filtered_factors.index.min(), filtered_factors.index.max()
 
 # recessions1 =    pd.date_range(start='1998-01-01', end='1999-03-01', freq='MS').to_list() 
 # recessions2 =    pd.date_range(start='2001-04-01', end='2001-12-01', freq='MS').to_list()
@@ -165,6 +156,18 @@ for i, factor in enumerate(filtered_factors.columns):
                     ymax=max(filtered_factors[factor].max(), smoothed_factors[factor].max())
                 )
 
+fig.tight_layout()
+
+# %% Estimar news
+news = new_model.news(
+    comparison=old_model, 
+    impacted_variable='pib', 
+    impact_date=next_pib_quarter_timestamp.strftime('%Y-%m-%d'),
+    # tolerance=1e-5,
+    comparison_type='previous',
+    revisions_details_start=-12  # Limita as matrizes de revisões apenas para os últimos 12 meses
+)
+print(news.summary())
 
 
 # %% Impactos e forecasts

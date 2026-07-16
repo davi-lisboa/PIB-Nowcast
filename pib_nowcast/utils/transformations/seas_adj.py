@@ -201,14 +201,15 @@ def seas_adj_stl(
 
 def _process_single_series_stl(col: str, series: pd.DataFrame, period: int = 12) -> tuple[str, pd.Series | None]:
     """Função auxiliar para processar uma única série usando STL."""
+
     if series.empty or len(series) < 2 * period:
         logger.warning(f"Coluna '{col}' tem {len(series)} obs (mínimo {2*period} para STL), pulando.")
         return col, None
 
     try:
         s = series[col]
-        # Aplica STL. robust=True ajuda com outliers
         res = STL(s, period=period, seasonal=period+1, robust=True).fit()
+        # Aplica STL. robust=True ajuda com outliers
         # Série com ajuste sazonal = Observado - Sazonal
         sa_result = s - res.seasonal
         return col, sa_result
