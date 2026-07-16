@@ -47,11 +47,8 @@ def get_bcb_parallel(
         return pd.DataFrame()
 
     # Utilize sgs.async_get to fetch all series concurrently
-    try:
-        bcb_series = asyncio.run(sgs.async_get(series, start=start))
-    except Exception as e:
-        print(f"Erro ao baixar as séries do BCB usando async_get: {e}")
-        bcb_series = pd.DataFrame()
+    # Deixamos erros subirem para que o @retry(stop=stop_after_attempt(5)) possa agir
+    bcb_series = asyncio.run(sgs.async_get(series, start=start))
         
     return bcb_series
 
