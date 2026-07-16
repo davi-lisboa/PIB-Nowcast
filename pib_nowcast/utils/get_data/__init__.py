@@ -21,6 +21,25 @@ def get_data(specs_df: pd.DataFrame, start:str | None = None):
     return full_data
 
 
+def get_data_parallel(specs_df: pd.DataFrame, start:str | None = None):
+    import pandas as pd
+    import concurrent.futures
+
+    from ._get_bcb import get_bcb_parallel
+    from ._get_ipeadata import get_ipeadata_parallel
+    from ._get_pib import get_pib
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+        future_bcb = executor.submit(get_bcb_parallel, specs_df, start)
+        future_ipea = executor.submit(get_ipeadata_parallel, specs_df, start)
+        future_pib = executor.submit(get_pib)
+        
+        bcb_df = future_bcb.result()
+        ipea_df = future_ipea.result()
+        pib_df = future_pib.result()
+
+    full_data = pd.concat([bcb_df, ipea_df, pib_df], axis=1, join='outer').loc[start:, :]
+    return full_data
 # %%
 if __name__ == '__main__':
     from pib_nowcast.config import SERIES_SPEC
