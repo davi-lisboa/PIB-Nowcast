@@ -103,6 +103,7 @@ new_model = old_model.apply(
 
 )
 
+
 # %% Estimar news
 news = new_model.news(
     comparison=old_model, 
@@ -129,6 +130,44 @@ forecasts_df = get_new_forecasts(
     historical_pib_index=pib_series,
     save_to=DATA_DIR / 'forecasts.xlsx'
 )
+# %%
+
+filtered_factors = new_model.factors['filtered']
+smoothed_factors = new_model.factors['smoothed']
+
+recessions1 =    pd.date_range(start='1998-01-01', end='1999-03-01', freq='MS').to_list() 
+recessions2 =    pd.date_range(start='2001-04-01', end='2001-12-01', freq='MS').to_list()
+recessions3 =    pd.date_range(start='2003-01-01', end='2003-06-01', freq='MS').to_list()
+recessions4 =    pd.date_range(start='2008-10-01', end='2009-03-01', freq='MS').to_list()
+recessions5 =    pd.date_range(start='2014-04-01', end='2016-12-01', freq='MS').to_list()
+recessions6 =    pd.date_range(start='2020-01-01', end='2020-06-01', freq='MS').to_list()
+
+recessions = [recessions1, recessions2, recessions3, recessions4, recessions5, recessions6]
+
+def _add_recessions(recessions, ax, ymin, ymax):
+    for recession in recessions:
+        ax.fill_between(x=recession, y1=ymin, y2=ymax, color='black', alpha=0.3)
+
+import matplotlib.pyplot as plt
+
+fig, ax = plt.subplots(2, 3, figsize=(14, 6))
+
+ax = ax.ravel()
+
+for i, factor in enumerate(filtered_factors.columns):
+
+    ax[i].set_title(factor)
+    ax[i].plot(filtered_factors.index, filtered_factors[factor], label='Filtered', color='blue')
+    ax[i].plot(smoothed_factors.index, smoothed_factors[factor], label='Smoothed', color='orange')
+    ax[i].legend()
+    _add_recessions(
+                    recessions, 
+                    ax[i], 
+                    ymin=min(filtered_factors[factor].min(), smoothed_factors[factor].min()), 
+                    ymax=max(filtered_factors[factor].max(), smoothed_factors[factor].max())
+                )
+
+
 
 
 # %%
