@@ -30,7 +30,10 @@ old_full_data = pd.read_excel(LAST_DATA, sheet_name='full_dataset', index_col='D
 
 ## Coleta dados mais recentes
 new_full_data = get_data_parallel(specs_df, start_date)
+# Reordenar as colunas para evitar erros no apply do statsmodels
+new_full_data = new_full_data[old_full_data.columns]
 
+new_full_data
 # %% Comparação
 
 if old_full_data.equals(new_full_data):
@@ -53,6 +56,11 @@ new_full_data_sa = seas_adj_stl_parallel(new_full_data_defl, specs_df)
 ## -> Estacionarização
 old_full_data_stat = make_stationary(old_full_data_sa, specs_df)
 new_full_data_stat = make_stationary(new_full_data_sa, specs_df)
+
+## Filtro de data
+old_full_data_stat = old_full_data_stat.loc['2007-01-01':, :]
+new_full_data_stat = new_full_data_stat.loc['2007-01-01':, :]
+
 
 # %% Separar datas e dfs relevantes do PIB (Antes da Limpeza de Memória)
 
@@ -84,12 +92,16 @@ old_model = DynamicFactorMQ(
     endog = old_full_data_stat,
     k_endog_monthly = specs_df.query("frequency == 'Monthly' ").shape[0],
     factors = factors,
-    factor_multiplicities={ 'Global': 2 },
-    # factor_orders = {
-    #     'Global': 4,
-    #     ('Output', 'Employment', 'Prices', 'Sentiment', 'Credit'): 1
-    # }
-).fit()
+    # factor_multiplicities={ 'Global': 2 },
+    factor_orders = {
+        'Global': 1,
+        ('Output', 'Employment', 'Prices', 'Sentiment', 'Credit'): 1
+    }
+).fit(
+    disp=True,
+    maxiter=120,
+    tolerance=1e-5,
+)
 
 print(old_model.summary())
 
@@ -113,34 +125,22 @@ news = new_model.news(
 )
 print(news.summary())
 
-# %% Impactos e forecasts
-
-## -> Salvar impactos no histórico
-get_news_impacts(news, save_to=DATA_DIR / 'news_impacts.xlsx')
-
-
-## -> Salvar novos forecasts no histórico
-forecasts_df = get_new_forecasts(
-    news=news, 
-    new_model_res=new_model, 
-    last_pib_date_timestamp=last_pib_date_timestamp, 
-    next_pib_quarter_timestamp=next_pib_quarter_timestamp, 
-    historical_pib_index=pib_series,
-    save_to=DATA_DIR / 'forecasts.xlsx'
-)
 # %%
 
 filtered_factors = new_model.factors['filtered']
 smoothed_factors = new_model.factors['smoothed']
 
-recessions1 =    pd.date_range(start='1998-01-01', end='1999-03-01', freq='MS').to_list() 
-recessions2 =    pd.date_range(start='2001-04-01', end='2001-12-01', freq='MS').to_list()
-recessions3 =    pd.date_range(start='2003-01-01', end='2003-06-01', freq='MS').to_list()
+# recessions1 =    pd.date_range(start='1998-01-01', end='1999-03-01', freq='MS').to_list() 
+# recessions2 =    pd.date_range(start='2001-04-01', end='2001-12-01', freq='MS').to_list()
+# recessions3 =    pd.date_range(start='2003-01-01', end='2003-06-01', freq='MS').to_list()
 recessions4 =    pd.date_range(start='2008-10-01', end='2009-03-01', freq='MS').to_list()
 recessions5 =    pd.date_range(start='2014-04-01', end='2016-12-01', freq='MS').to_list()
 recessions6 =    pd.date_range(start='2020-01-01', end='2020-06-01', freq='MS').to_list()
 
-recessions = [recessions1, recessions2, recessions3, recessions4, recessions5, recessions6]
+recessions = [
+    # recessions1, recessions2, recessions3, 
+    recessions4, recessions5, recessions6
+    ]
 
 def _add_recessions(recessions, ax, ymin, ymax):
     for recession in recessions:
@@ -167,5 +167,20 @@ for i, factor in enumerate(filtered_factors.columns):
 
 
 
+# %% Impactos e forecasts
+
+## -> Salvar impactos no histórico
+get_news_impacts(news, save_to=DATA_DIR / 'news_impacts.xlsx')
+
+
+## -> Salvar novos forecasts no histórico
+forecasts_df = get_new_forecasts(
+    news=news, 
+    new_model_res=new_model, 
+    last_pib_date_timestamp=last_pib_date_timestamp, 
+    next_pib_quarter_timestamp=next_pib_quarter_timestamp, 
+    historical_pib_index=pib_series,
+    save_to=DATA_DIR / 'forecasts.xlsx'
+)
 
 # %%
