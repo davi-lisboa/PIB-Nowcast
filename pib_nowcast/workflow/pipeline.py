@@ -9,16 +9,16 @@ import datetime as dt
 
 from statsmodels.tsa.api import DynamicFactorMQ
 
-from pib_nowcast.config import SERIES_SPEC, LAST_DATA, DATA_DIR
+from pib_nowcast.config import SERIES_SPEC, LAST_DATA, DATA_DIR, START_DATE, OUTLIER_THRESHOLD, RECESSIONS
 from pib_nowcast.utils.get_data import get_data, get_data_parallel
-from pib_nowcast.utils.transformations import seas_adj_stl_parallel, make_stationary, deflate
+from pib_nowcast.utils.transformations import seas_adj_stl_parallel, make_stationary, deflate, remove_outliers
 from pib_nowcast.utils.news import get_news_impacts, get_new_forecasts
 
 # %%
 
 ### Especifica caminho e primeira data
 specs_df = pd.read_csv(SERIES_SPEC, sep=';')
-start_date = '1996-01-01'
+start_date = START_DATE
 
 ### Especificação de datas
 today = dt.date.today()
@@ -60,6 +60,10 @@ new_full_data_stat = make_stationary(new_full_data_sa, specs_df)
 ## Filtro de data
 old_full_data_stat = old_full_data_stat.loc['2007-01-01':, :]
 new_full_data_stat = new_full_data_stat.loc['2007-01-01':, :]
+
+## -> Remoção de Outliers
+old_full_data_stat = remove_outliers(old_full_data_stat, threshold=OUTLIER_THRESHOLD)
+new_full_data_stat = remove_outliers(new_full_data_stat, threshold=OUTLIER_THRESHOLD)
 
 
 # %% Separar datas e dfs relevantes do PIB (Antes da Limpeza de Memória)
@@ -121,18 +125,6 @@ smoothed_factors = new_model.factors['smoothed']
 
 # start, end = filtered_factors.index.min(), filtered_factors.index.max()
 
-# recessions1 =    pd.date_range(start='1998-01-01', end='1999-03-01', freq='MS').to_list() 
-# recessions2 =    pd.date_range(start='2001-04-01', end='2001-12-01', freq='MS').to_list()
-# recessions3 =    pd.date_range(start='2003-01-01', end='2003-06-01', freq='MS').to_list()
-recessions4 =    pd.date_range(start='2008-10-01', end='2009-03-01', freq='MS').to_list()
-recessions5 =    pd.date_range(start='2014-04-01', end='2016-12-01', freq='MS').to_list()
-recessions6 =    pd.date_range(start='2020-01-01', end='2020-06-01', freq='MS').to_list()
-
-recessions = [
-    # recessions1, recessions2, recessions3, 
-    recessions4, recessions5, recessions6
-    ]
-
 def _add_recessions(recessions, ax, ymin, ymax):
     for recession in recessions:
         ax.fill_between(x=recession, y1=ymin, y2=ymax, color='black', alpha=0.3)
@@ -150,7 +142,7 @@ for i, factor in enumerate(filtered_factors.columns):
     ax[i].plot(smoothed_factors.index, smoothed_factors[factor], label='Smoothed', color='orange')
     ax[i].legend()
     _add_recessions(
-                    recessions, 
+                    RECESSIONS, 
                     ax[i], 
                     ymin=min(filtered_factors[factor].min(), smoothed_factors[factor].min()), 
                     ymax=max(filtered_factors[factor].max(), smoothed_factors[factor].max())

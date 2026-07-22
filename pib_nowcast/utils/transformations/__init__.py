@@ -9,3 +9,4 @@ from .transform_pipeline import (
     make_stationary,
 )
 from .deflate import deflate
+from .outliers import remove_outliers

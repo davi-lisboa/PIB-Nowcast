@@ -39,6 +39,8 @@ def get_data_parallel(specs_df: pd.DataFrame, start:str | None = None):
         pib_df = future_pib.result()
 
     full_data = pd.concat([bcb_df, ipea_df, pib_df], axis=1, join='outer').loc[start:, :]
+    full_data.index.name = 'Date'
+    
     return full_data
 # %%
 if __name__ == '__main__':
@@ -48,4 +50,4 @@ if __name__ == '__main__':
     specs_df = pd.read_csv(SERIES_SPEC, sep=';')
     start_date = '1996-01-01'
 
-    get_data(specs_df, start_date)
+    get_data(specs_df, start_date)

@@ -198,14 +198,13 @@ def make_stationary(df: pd.DataFrame, specs_df: pd.DataFrame) -> pd.DataFrame:
     """
     transformed_series = []
     
+    pipe_map = specs_df.set_index('variable')['transformation_id'].to_dict()
+    
     for col in df.columns:
-        if col not in specs_df['variable'].values:
-            continue
-            
-        pipe_id = specs_df.loc[specs_df['variable'] == col, 'transformation_id'].iloc[0]
+        pipe_id = pipe_map.get(col)
         
         # Ignora se não houver transformação definida (-1, nulo, etc.)
-        if pd.isna(pipe_id) or pipe_id < 0:
+        if pipe_id is None or pd.isna(pipe_id) or pipe_id < 0:
             continue
             
         s_transformed = apply_transform_pipeline(df[col], int(pipe_id))

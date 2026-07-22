@@ -126,12 +126,8 @@ fgv_nuci;28561;['Global', 'Output'];Monthly;1;N/A;sgs;8
 concessoes_PJ_total;24440;['Global', 'Credit'];Monthly;1;0;sgs;10
 concessoes_PF_total;24441;['Global', 'Credit'];Monthly;1;0;sgs;10
 concessoes_livres_PJ_total;24443;['Global', 'Credit'];Monthly;1;0;sgs;10
-concessoes_livres_PJ_nao_rotativo;28167;['Global', 'Credit'];Monthly;1;0;sgs;10
 concessoes_livres_PJ_capital_giro;28169;['Global', 'Credit'];Monthly;1;0;sgs;10
 concessoes_livres_PF_total;24444;['Global', 'Credit'];Monthly;1;0;sgs;10
-concessoes_livres_PF_nao_rotativo;28168;['Global', 'Credit'];Monthly;1;0;sgs;10
-concessoes_livres_PF_aquisicao_veiculos;28170;['Global', 'Credit'];Monthly;1;0;sgs;10
-concessoes_livres_PF_cartao_credito_avista;28171;['Global', 'Credit'];Monthly;1;0;sgs;10
 concessoes_direcionados_PJ_total;24446;['Global', 'Credit'];Monthly;1;0;sgs;10
 concessoes_direcionados_PF_total;24447;['Global', 'Credit'];Monthly;1;0;sgs;10
 concessoes_direcionados_credito_rural;28172;['Global', 'Credit'];Monthly;1;0;sgs;10
@@ -157,3 +153,29 @@ icc_fgv;FGV12_ICSTCA12;['Global', 'Sentiment'];Monthly;1;N/A;ipeadata;10
 icc_fgv_sit_atual;FGV12_ISACSTCA12;['Global', 'Sentiment'];Monthly;1;N/A;ipeadata;10
 icc_fgv_expectativas;FGV12_IECSTCA12;['Global', 'Sentiment'];Monthly;1;N/A;ipeadata;10
 pib;;['Global', 'Output'];Quarterly;1;1;sidra;16
+inadimplencia_livres_total;21085;['Global', 'Credit'];Monthly;0;N/A;sgs;8
+inadimplencia_livres_PJ_total;21086;['Global', 'Credit'];Monthly;0;N/A;sgs;8
+inadimplencia_livres_PJ_desconto_de_duplicatas_e_recebiveis;21087;['Global', 'Credit'];Monthly;0;N/A;sgs;8
+inadimplencia_livres_PJ_capital_de_giro_total;21093;['Global', 'Credit'];Monthly;0;N/A;sgs;8
+inadimplencia_livres_PJ_aquisicao_de_bens_total;21098;['Global', 'Credit'];Monthly;0;N/A;sgs;8
+inadimplencia_livres_PJ_arrendamento_mercantil_total;21101;['Global', 'Credit'];Monthly;0;N/A;sgs;8
+inadimplencia_livres_PJ_cartao_de_credito_total;21106;['Global', 'Credit'];Monthly;0;N/A;sgs;8
+inadimplencia_livres_PF_total;21112;['Global', 'Credit'];Monthly;0;N/A;sgs;8
+inadimplencia_livres_PF_cheque_especial;21113;['Global', 'Credit'];Monthly;0;N/A;sgs;8
+inadimplencia_livres_PF_credito_pessoal_nao_consignado_total;21114;['Global', 'Credit'];Monthly;0;N/A;sgs;8
+inadimplencia_livres_PF_credito_pessoal_consignado_total;21119;['Global', 'Credit'];Monthly;0;N/A;sgs;8
+inadimplencia_livres_PF_aquisicao_de_bens_total;21123;['Global', 'Credit'];Monthly;0;N/A;sgs;8
+inadimplencia_livres_PF_arrendamento_mercantil_total;21126;['Global', 'Credit'];Monthly;0;N/A;sgs;8
+inadimplencia_livres_PF_cartao_de_credito_total;21129;['Global', 'Credit'];Monthly;0;N/A;sgs;8
+concessoes_livres_total;20634;['Global','Credit'];Monthly;0;N/A;sgs;10
+concessoes_livres_PJ_desconto_de_duplicatas_e_recebveis;20636;['Global','Credit'];Monthly;0;N/A;sgs;10
+concessoes_livres_PJ_capital_de_giro_total;20642;['Global','Credit'];Monthly;0;N/A;sgs;10
+concessoes_livres_PJ_aquisicao_de_bens_total;20647;['Global','Credit'];Monthly;0;N/A;sgs;10
+concessoes_livres_PJ_arrendamento_mercantil_total;20650;['Global','Credit'];Monthly;0;N/A;sgs;10
+concessoes_livres_PJ_cartao_de_credito_total;20656;['Global','Credit'];Monthly;0;N/A;sgs;10
+concessoes_livres_PF_cheque_especial;20665;['Global','Credit'];Monthly;0;N/A;sgs;10
+concessoes_livres_PF_credito_pessoal_nao_consignado_total;20666;['Global','Credit'];Monthly;0;N/A;sgs;10
+concessoes_livres_PF_credito_pessoal_consignado_total;20671;['Global','Credit'];Monthly;0;N/A;sgs;10
+concessoes_livres_PF_aquisicao_de_bens_total;20675;['Global','Credit'];Monthly;0;N/A;sgs;10
+concessoes_livres_PF_arrendamento_mercantil_total;20678;['Global','Credit'];Monthly;0;N/A;sgs;10
+concessoes_livres_PF_cartao_de_credito_total;20682;['Global','Credit'];Monthly;0;N/A;sgs;10
