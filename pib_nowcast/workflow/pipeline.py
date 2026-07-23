@@ -9,7 +9,7 @@ import datetime as dt
 
 from statsmodels.tsa.api import DynamicFactorMQ
 
-from pib_nowcast.config import SERIES_SPEC, LAST_DATA, DATA_DIR, START_DATE, OUTLIER_THRESHOLD, RECESSIONS
+from pib_nowcast.config import SERIES_SPEC, LAST_DATA, DATA_DIR, START_DATE, OUTLIER_THRESHOLD, RECESSIONS, MODEL_PARAMS_FILE
 from pib_nowcast.utils.get_data import get_data, get_data_parallel
 from pib_nowcast.utils.transformations import seas_adj_stl_parallel, make_stationary, deflate, remove_outliers
 from pib_nowcast.utils.news import get_news_impacts, get_new_forecasts
@@ -19,6 +19,7 @@ from pib_nowcast.utils.news import get_news_impacts, get_new_forecasts
 ### Especifica caminho e primeira data
 specs_df = pd.read_csv(SERIES_SPEC, sep=';')
 start_date = START_DATE
+fit_start_date = '2012-01-01'
 
 ### Especificação de datas
 today = dt.date.today()
@@ -58,8 +59,8 @@ old_full_data_stat = make_stationary(old_full_data_sa, specs_df)
 new_full_data_stat = make_stationary(new_full_data_sa, specs_df)
 
 ## Filtro de data
-old_full_data_stat = old_full_data_stat.loc['2007-01-01':, :]
-new_full_data_stat = new_full_data_stat.loc['2007-01-01':, :]
+old_full_data_stat = old_full_data_stat.loc[fit_start_date:, :]
+new_full_data_stat = new_full_data_stat.loc[fit_start_date:, :]
 
 ## -> Remoção de Outliers
 old_full_data_stat = remove_outliers(old_full_data_stat, threshold=OUTLIER_THRESHOLD)
@@ -92,7 +93,7 @@ factors = {
     for k, v in factors.items()
 }
 
-old_model = DynamicFactorMQ(
+old_model_base = DynamicFactorMQ(
     endog = old_full_data_stat,
     k_endog_monthly = specs_df.query("frequency == 'Monthly' ").shape[0],
     factors = factors,
@@ -101,11 +102,27 @@ old_model = DynamicFactorMQ(
         'Global': 3,
         ('Output', 'Employment', 'Prices', 'Sentiment', 'Credit'): 2
     }
-).fit(
-    disp=True,
-    maxiter=120,
-    tolerance=1e-5,
 )
+
+refit = True
+save_params = True
+
+# Se o arquivo de parâmetros existir, carrega e faz smooth
+if MODEL_PARAMS_FILE.exists() and not refit:
+    print(f"[{dt.datetime.now().time()}] Carregando parâmetros do modelo de cache: {MODEL_PARAMS_FILE.name}")
+    # Injeta parâmetros estáticos sem rodar EM, ~0.1s
+    params = pd.read_csv(MODEL_PARAMS_FILE, index_col=0).squeeze("columns")
+    old_model = old_model_base.smooth(params)
+else:
+    print(f"[{dt.datetime.now().time()}] Treinando modelo completo (isso pode demorar)...")
+    old_model = old_model_base.fit(
+        disp=True,
+        maxiter=120,
+        tolerance=1e-5,
+    )
+    if save_params:
+        old_model.params.to_csv(MODEL_PARAMS_FILE)
+        print(f"[{dt.datetime.now().time()}] Parâmetros salvos em {MODEL_PARAMS_FILE.name}")
 
 print(old_model.summary())
 
@@ -131,7 +148,9 @@ def _add_recessions(recessions, ax, ymin, ymax):
 
 import matplotlib.pyplot as plt
 
-fig, ax = plt.subplots(2, 3, figsize=(14, 6))
+n_fatores = len(filtered_factors.columns)
+
+fig, ax = plt.subplots(n_fatores // 2, 3, figsize=(14, 8), dpi=300)
 
 ax = ax.ravel()
 
@@ -147,6 +166,10 @@ for i, factor in enumerate(filtered_factors.columns):
                     ymin=min(filtered_factors[factor].min(), smoothed_factors[factor].min()), 
                     ymax=max(filtered_factors[factor].max(), smoothed_factors[factor].max())
                 )
+
+for i, _ in enumerate(ax, start=1):
+    if i > n_fatores:
+        ax[i].axis('off')
 
 fig.tight_layout()
 
@@ -164,18 +187,20 @@ print(news.summary())
 
 # %% Impactos e forecasts
 
-## -> Salvar impactos no histórico
-get_news_impacts(news, save_to=DATA_DIR / 'news_impacts.xlsx')
+export = False
+
+if export:
+    ## -> Salvar impactos no histórico
+    get_news_impacts(news, save_to=DATA_DIR / 'news_impacts.xlsx')
 
 
-## -> Salvar novos forecasts no histórico
-forecasts_df = get_new_forecasts(
-    news=news, 
-    new_model_res=new_model, 
-    last_pib_date_timestamp=last_pib_date_timestamp, 
-    next_pib_quarter_timestamp=next_pib_quarter_timestamp, 
-    historical_pib_index=pib_series,
-    save_to=DATA_DIR / 'forecasts.xlsx'
-)
+    ## -> Salvar novos forecasts no histórico
+    forecasts_df = get_new_forecasts(
+        news=news, 
+        new_model_res=new_model, 
+        last_pib_date_timestamp=last_pib_date_timestamp, 
+        next_pib_quarter_timestamp=next_pib_quarter_timestamp, 
+        historical_pib_index=pib_series,
+        save_to=DATA_DIR / 'forecasts.xlsx'
+    )
 
-# %%
