@@ -99,8 +99,10 @@ old_model_base = DynamicFactorMQ(
     factors = factors,
     # factor_multiplicities={ 'Global': 2 },
     factor_orders = {
-        'Global': 3,
-        ('Output', 'Employment', 'Prices', 'Sentiment', 'Credit'): 2
+        # 'Global': 1,
+        # ('Output', 'Employment', 'Prices', 'Sentiment', 'Credit'): 1,
+        ('Global', 'Output', 'Employment', 'Prices', 'Sentiment', 'Credit'): 4
+
     }
 )
 
@@ -150,7 +152,7 @@ import matplotlib.pyplot as plt
 
 n_fatores = len(filtered_factors.columns)
 
-fig, ax = plt.subplots(n_fatores // 2, 3, figsize=(14, 8), dpi=300)
+fig, ax = plt.subplots(n_fatores // 3, 3, figsize=(14, 8), dpi=300)
 
 ax = ax.ravel()
 
@@ -161,14 +163,14 @@ for i, factor in enumerate(filtered_factors.columns):
     ax[i].plot(smoothed_factors.index, smoothed_factors[factor], label='Smoothed', color='orange')
     ax[i].legend()
     _add_recessions(
-                    RECESSIONS, 
+                    RECESSIONS[1:], 
                     ax[i], 
                     ymin=min(filtered_factors[factor].min(), smoothed_factors[factor].min()), 
                     ymax=max(filtered_factors[factor].max(), smoothed_factors[factor].max())
                 )
 
-for i, _ in enumerate(ax, start=1):
-    if i > n_fatores:
+for i, _ in enumerate(ax):
+    if i > (n_fatores - 1):
         ax[i].axis('off')
 
 fig.tight_layout()

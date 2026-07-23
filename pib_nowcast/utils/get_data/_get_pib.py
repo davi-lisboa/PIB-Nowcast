@@ -4,10 +4,14 @@ from tenacity import wait_fixed, retry, stop_after_attempt
 def get_pib():
     import pandas as pd
     import sidrapy
+    # Sem ajuste sazonal
     # https://apisidra.ibge.gov.br/values/t/1620/n1/all/v/all/p/all/c11255/90707/d/v583%202
 
+    # Com ajuste sazonal
+    # https://apisidra.ibge.gov.br/values/t/1621/n1/all/v/all/p/all/c11255/90707/d/v584%204
+
     pib = sidrapy.get_table(
-                                table_code='1620', 
+                                table_code='1621', # 1620 
                                 territorial_level='1', 
                                 ibge_territorial_code='all', 
                                 period='all',

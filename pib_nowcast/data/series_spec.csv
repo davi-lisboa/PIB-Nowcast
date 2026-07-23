@@ -177,5 +177,5 @@ concessoes_livres_PF_cheque_especial;20665;['Global','Credit'];Monthly;0;N/A;sgs
 concessoes_livres_PF_credito_pessoal_nao_consignado_total;20666;['Global','Credit'];Monthly;0;N/A;sgs;10
 concessoes_livres_PF_credito_pessoal_consignado_total;20671;['Global','Credit'];Monthly;0;N/A;sgs;10
 concessoes_livres_PF_aquisicao_de_bens_total;20675;['Global','Credit'];Monthly;0;N/A;sgs;10
-concessoes_livres_PF_arrendamento_mercantil_total;20678;['Global','Credit'];Monthly;0;N/A;sgs;10
+concessoes_livres_PF_arrendamento_mercantil_total;20678;['Global','Credit'];Monthly;0;N/A;sgs;8
 concessoes_livres_PF_cartao_de_credito_total;20682;['Global','Credit'];Monthly;0;N/A;sgs;10
