@@ -33,6 +33,7 @@ old_full_data = pd.read_excel(LAST_DATA, sheet_name='full_dataset', index_col='D
 ## Coleta dados mais recentes
 new_full_data = get_data_parallel(specs_df, start_date)
 # Reordenar as colunas para evitar erros no apply do statsmodels
+# old_full_data = old_full_data[new_full_data.columns]
 new_full_data = new_full_data[old_full_data.columns]
 
 new_full_data
@@ -82,7 +83,7 @@ last_pib_date_timestamp = pib_series.last_valid_index()
 next_pib_quarter_timestamp = last_pib_date_timestamp + pd.DateOffset(months=3)
 
 # %% Limpeza de Memória
-del old_full_data, new_full_data, old_full_data_sa, new_full_data_sa
+# del old_full_data, new_full_data, old_full_data_sa, new_full_data_sa
 gc.collect()
 
 # %% Estimação do modelo com dados antigos
@@ -98,14 +99,14 @@ old_model_base = DynamicFactorMQ(
     endog = old_full_data_stat,
     k_endog_monthly = specs_df.query("frequency == 'Monthly' ").shape[0],
     factors = factors,
-    # factor_multiplicities={ 'Global': 2 },
     factor_orders = {
-        # 'Global': 1,
-        # ('Output', 'Employment', 'Prices', 'Sentiment', 'Credit'): 1,
         ('Global', 'Output', 'Employment', 'Prices', 'Sentiment', 'Credit'): 4
 
     }
 )
+# factor_multiplicities={ 'Global': 2 },
+# 'Global': 1,
+# ('Output', 'Employment', 'Prices', 'Sentiment', 'Credit'): 1,
 
 refit = True
 save_params = True

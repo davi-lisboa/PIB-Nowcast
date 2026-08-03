@@ -2,7 +2,7 @@
 import pandas as pd
 from tenacity import wait_fixed, retry, stop_after_attempt
 
-@retry(stop=stop_after_attempt(5))
+@retry(stop=stop_after_attempt(5), wait=wait_fixed(5))
 def get_bcb(
             series: str | dict| pd.DataFrame | None = None, 
             start: str|None = None, 
@@ -24,7 +24,7 @@ def get_bcb(
 
     return sgs.get(series, start, last)
 
-@retry(stop=stop_after_attempt(5))
+@retry(stop=stop_after_attempt(5), wait=wait_fixed(5))
 def get_bcb_parallel(
             series: str | dict| pd.DataFrame | None = None, 
             start: str|None = None, 
@@ -47,11 +47,8 @@ def get_bcb_parallel(
         return pd.DataFrame()
 
     # Utilize sgs.async_get to fetch all series concurrently
-    try:
-        bcb_series = asyncio.run(sgs.async_get(series, start=start))
-    except Exception as e:
-        print(f"Erro ao baixar as séries do BCB usando async_get: {e}")
-        bcb_series = pd.DataFrame()
+    bcb_series = asyncio.run(sgs.async_get(series, start=start))
+
         
     return bcb_series
 

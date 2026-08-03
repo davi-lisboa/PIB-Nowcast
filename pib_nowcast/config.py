@@ -15,7 +15,7 @@ MODEL_PARAMS_FILE = DATA_DIR / "dfm_params.csv"
 
 # Parâmetros Globais
 START_DATE = '1996-01-01'
-OUTLIER_THRESHOLD = 5
+OUTLIER_THRESHOLD = 3
 RECESSIONS = [
     pd.date_range(start='2008-10-01', end='2009-03-01', freq='MS').to_list(),
     pd.date_range(start='2014-04-01', end='2016-12-01', freq='MS').to_list(),
