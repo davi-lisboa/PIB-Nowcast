@@ -50,6 +50,10 @@ def _mom_pct(s: pd.Series) -> pd.Series:
     """Variação percentual MoM."""
     return s.pct_change(1).dropna() * 100
 
+def _mom_pct_annual_rate(s: pd.Series) -> pd.Series:
+    """Variação percentual MoM."""
+    return s.pct_change(1).dropna() * 100 * 4
+
 def _yoy_pct_monthly(s: pd.Series) -> pd.Series:
     """Variação percentual YoY (12 meses). Específica para séries mensais."""
     return s.pct_change(12).dropna() * 100
@@ -100,16 +104,18 @@ PIPELINE_REGISTRY: dict[int, tuple[str, list, bool]] = {
     11: ("log→sdiff12→diff",   [_log, _sdiff12, _multiply_100, _diff], True),
     12: ("boxcox→sdiff12→diff", [_boxcox, _sdiff12, _diff],  True),
     13: ("mom_pct",            [_mom_pct],                   False),
-    14: ("yoy_pct_monthly",    [_yoy_pct_monthly],           False),
+    14: ("mom_pct_annual_rate", [_mom_pct_annual_rate],      False),
+    15: ("yoy_pct_monthly",    [_yoy_pct_monthly],           False),
+
 
     # ── Trimestrais ──
-    15: ("qoq_pct",            [_qoq_pct],                   False),
-    16: ("yoy_pct",            [_yoy_pct_quarterly],         False),
-    17: ("sdiff4",             [_sdiff4],                    False),
-    18: ("sdiff4→diff",        [_sdiff4, _diff],             False),
-    19: ("log→sdiff4",         [_log, _sdiff4, _multiply_100], True),
-    20: ("log→sdiff4→diff",    [_log, _sdiff4, _multiply_100, _diff], True),
-    21: ("qoq_annualized",     [_qoq_annualized],           False),
+    16: ("qoq_pct",            [_qoq_pct],                   False),
+    17: ("yoy_pct",            [_yoy_pct_quarterly],         False),
+    18: ("sdiff4",             [_sdiff4],                    False),
+    19: ("sdiff4→diff",        [_sdiff4, _diff],             False),
+    20: ("log→sdiff4",         [_log, _sdiff4, _multiply_100], True),
+    21: ("log→sdiff4→diff",    [_log, _sdiff4, _multiply_100, _diff], True),
+    22: ("qoq_annualized",     [_qoq_annualized],           False),
 }
 
 # Mapeamento nome → id (útil para lookups a partir do nome legível)
@@ -118,8 +124,8 @@ PIPELINE_NAME_TO_ID: dict[str, int] = {
 }
 
 # IDs válidos para cada frequência
-MONTHLY_PIPELINE_IDS: list[int] = list(range(0, 14+1))
-QUARTERLY_PIPELINE_IDS: list[int] = [0, 1, 2, 3, 15, 16, 17, 18, 19, 20, 21]
+MONTHLY_PIPELINE_IDS: list[int] = list(range(0, 15+1))
+QUARTERLY_PIPELINE_IDS: list[int] = [0, 1, 2, 3, 16, 17, 18, 19, 20, 21, 22]
 
 
 def apply_transform_pipeline(
