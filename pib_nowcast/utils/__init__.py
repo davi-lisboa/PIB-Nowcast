@@ -20,6 +20,7 @@ __all__ = [
     "get_bcb",
     "get_ipeadata",
     "get_pib",
+    "get_pib_v2",
     "seas_adj",
     "stationarity_tests",
     "is_stationary",

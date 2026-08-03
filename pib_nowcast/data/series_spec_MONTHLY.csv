@@ -152,7 +152,7 @@ prod_fertilizante;ANDA12_PFERTILIZ12;['Global', 'Output'];Monthly;0;N/A;ipeadata
 icc_fgv;FGV12_ICSTCA12;['Global', 'Sentiment'];Monthly;1;N/A;ipeadata;3
 icc_fgv_sit_atual;FGV12_ISACSTCA12;['Global', 'Sentiment'];Monthly;1;N/A;ipeadata;3
 icc_fgv_expectativas;FGV12_IECSTCA12;['Global', 'Sentiment'];Monthly;1;N/A;ipeadata;3
-pib;;['Global', 'Output'];Quarterly;1;1;sidra;14
+pib;1621;['Global', 'Output'];Quarterly;1;1;sidra;22
 inadimplencia_livres_total;21085;['Global', 'Credit'];Monthly;0;N/A;sgs;1
 inadimplencia_livres_PJ_total;21086;['Global', 'Credit'];Monthly;0;N/A;sgs;1
 inadimplencia_livres_PJ_desconto_de_duplicatas_e_recebiveis;21087;['Global', 'Credit'];Monthly;0;N/A;sgs;1

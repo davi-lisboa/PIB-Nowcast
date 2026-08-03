@@ -27,6 +27,7 @@ __all__ = [
     "get_bcb",
     "get_ipeadata",
     "get_pib",
+    "get_pib_v2",
     # transformations
     "seas_adj",
     "stationarity_tests",
