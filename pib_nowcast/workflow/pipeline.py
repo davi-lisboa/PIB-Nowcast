@@ -99,11 +99,12 @@ old_model_base = DynamicFactorMQ(
     endog = old_full_data_stat,
     k_endog_monthly = specs_df.query("frequency == 'Monthly' ").shape[0],
     factors = factors,
-    factor_orders = {
-        ('Global', 'Output', 'Employment', 'Prices', 'Sentiment', 'Credit'): 4
-
-    }
+    factor_orders = 1
 )
+    # factor_orders = {
+    #     ('Global', 'Output', 'Employment', 'Prices', 'Sentiment', 'Credit'): 4
+
+    # }
 # factor_multiplicities={ 'Global': 2 },
 # 'Global': 1,
 # ('Output', 'Employment', 'Prices', 'Sentiment', 'Credit'): 1,
