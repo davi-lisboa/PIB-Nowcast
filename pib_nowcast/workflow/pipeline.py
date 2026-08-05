@@ -14,13 +14,14 @@ from pib_nowcast.config import SERIES_SPEC, LAST_DATA, DATA_DIR, START_DATE, OUT
 from pib_nowcast.utils.get_data import get_data, get_data_parallel
 from pib_nowcast.utils.transformations import seas_adj_stl_parallel, make_stationary, deflate, remove_outliers
 from pib_nowcast.utils.news import get_news_impacts, get_new_forecasts
+from pib_nowcast.utils.plots import plot_factors
 
 # %%
 
 ### Especifica caminho e primeira data
 specs_df = pd.read_csv(SERIES_SPEC, sep=';')
 start_date = START_DATE
-fit_start_date = '2012-01-01'
+fit_start_date = '1996-01-01'
 
 ### Especificação de datas
 today = dt.date.today()
@@ -99,13 +100,19 @@ old_model_base = DynamicFactorMQ(
     endog = old_full_data_stat,
     k_endog_monthly = specs_df.query("frequency == 'Monthly' ").shape[0],
     factors = factors,
-    factor_orders = 1
-)
-    # factor_orders = {
-    #     ('Global', 'Output', 'Employment', 'Prices', 'Sentiment', 'Credit'): 4
+    factor_multiplicities={ 'Global': 2 },
+    factor_orders = {
+        'Global': 4,
+        'Output': 4,
+        'Employment': 4,
+        'Prices': 4,
+        'Sentiment': 4,
+        'Credit': 4
 
-    # }
-# factor_multiplicities={ 'Global': 2 },
+    }
+    # factor_orders = 1
+        # ('Global', 'Output', 'Employment', 'Prices', 'Sentiment', 'Credit'): 4
+)
 # 'Global': 1,
 # ('Output', 'Employment', 'Prices', 'Sentiment', 'Credit'): 1,
 
@@ -131,6 +138,8 @@ else:
 
 print(old_model.summary())
 
+plot_factors(old_model, factor_type='both', show_recessions=True, save_fig=True)
+
 # %% Estimação do modelo com novos dados
 
 new_model = old_model.apply(
@@ -140,48 +149,7 @@ new_model = old_model.apply(
 )
 
 # %% Plot dos fatores
-# Plot dos fatores
-
-filtered_factors = new_model.factors['filtered']
-smoothed_factors = new_model.factors['smoothed']
-
-# start, end = filtered_factors.index.min(), filtered_factors.index.max()
-
-def _add_recessions(recessions, ax, ymin, ymax):
-    for recession in recessions:
-        ax.fill_between(x=recession, y1=ymin, y2=ymax, color='black', alpha=0.3)
-
-import matplotlib.pyplot as plt
-
-n_fatores = len(filtered_factors.columns)
-
-fig, ax = plt.subplots(n_fatores // 3, 3, figsize=(14, 8), dpi=300)
-
-ax = ax.ravel()
-
-for i, factor in enumerate(filtered_factors.columns):
-
-    ax[i].set_title(factor)
-    ax[i].plot(filtered_factors.index, filtered_factors[factor], label='Filtered', color='blue')
-    ax[i].plot(smoothed_factors.index, smoothed_factors[factor], label='Smoothed', color='orange')
-    ax[i].legend()
-    _add_recessions(
-                    RECESSIONS[1:], 
-                    ax[i], 
-                    ymin=min(filtered_factors[factor].min(), smoothed_factors[factor].min()), 
-                    ymax=max(filtered_factors[factor].max(), smoothed_factors[factor].max())
-                )
-
-for i, _ in enumerate(ax):
-    if i > (n_fatores - 1):
-        ax[i].axis('off')
-
-fig.tight_layout()
-
-save_fig = True
-now = dt.datetime.now().strftime('%Y-%m-%d_%Hh%Mm%Ss')
-if save_fig:
-    fig.savefig(FIG_DIR / f'fatores_{now}.png', dpi=300)
+plot_factors(new_model, factor_type='both', show_recessions=True, save_fig=True)
 
 # %% Estimar news
 news = new_model.news(
