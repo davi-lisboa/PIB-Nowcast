@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 from statsmodels.tsa.api import DynamicFactorMQ
 
-from pib_nowcast.config import SERIES_SPEC, LAST_DATA, DATA_DIR, START_DATE, OUTLIER_THRESHOLD, RECESSIONS, MODEL_PARAMS_FILE
+from pib_nowcast.config import SERIES_SPEC, LAST_DATA, DATA_DIR, START_DATE, OUTLIER_THRESHOLD, RECESSIONS, MODEL_PARAMS_FILE, FIG_DIR
 from pib_nowcast.utils.get_data import get_data, get_data_parallel
 from pib_nowcast.utils.transformations import seas_adj_stl_parallel, make_stationary, deflate, remove_outliers
 from pib_nowcast.utils.news import get_news_impacts, get_new_forecasts
@@ -177,6 +177,11 @@ for i, _ in enumerate(ax):
         ax[i].axis('off')
 
 fig.tight_layout()
+
+save_fig = True
+now = dt.datetime.now().strftime('%Y-%m-%d_%Hh%Mm%Ss')
+if save_fig:
+    fig.savefig(FIG_DIR / f'fatores_{now}.png', dpi=300)
 
 # %% Estimar news
 news = new_model.news(

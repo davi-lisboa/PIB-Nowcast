@@ -7,6 +7,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 # Caminhos derivados
 DATA_DIR = PROJECT_ROOT / "pib_nowcast" / "data"
 X13_PATH = PROJECT_ROOT / "x13as" / "x13as"
+FIG_DIR = PROJECT_ROOT / "pib_nowcast" / "figures"
 
 # SERIES_SPEC = DATA_DIR / "series_spec.csv"
 SERIES_SPEC = DATA_DIR / "series_spec_MONTHLY.csv"
