@@ -171,7 +171,7 @@ print(news.summary())
 
 # %% Impactos e forecasts
 
-export = False
+export = True
 
 if export:
     ## -> Salvar impactos no histórico
