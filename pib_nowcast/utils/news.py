@@ -136,3 +136,25 @@ def get_new_forecasts(
             all_forecasts_df.to_excel(save_to, index=False)
             
     return all_forecasts_df
+
+def get_factors_history(model_res, save_to: str | None = None) -> None:
+    """Combina fatores smoothed e filtered, formatando para longo e salvando historicamente."""
+    today = dt.date.today()
+    
+    smoothed = model_res.factors.smoothed.reset_index().melt(id_vars=model_res.factors.smoothed.index.name or 'index', var_name='factor', value_name='value')
+    smoothed['type'] = 'smoothed'
+    
+    filtered = model_res.factors.filtered.reset_index().melt(id_vars=model_res.factors.filtered.index.name or 'index', var_name='factor', value_name='value')
+    filtered['type'] = 'filtered'
+    
+    factors_df = pd.concat([smoothed, filtered], ignore_index=True)
+    factors_df = factors_df.rename(columns={model_res.factors.smoothed.index.name or 'index': 'reference date'})
+    factors_df['update_date'] = today
+    
+    if save_to:
+        if os.path.exists(save_to):
+            history_df = pd.read_excel(save_to)
+            final_df = pd.concat([history_df, factors_df], ignore_index=True)
+            final_df.to_excel(save_to, index=False)
+        else:
+            factors_df.to_excel(save_to, index=False)

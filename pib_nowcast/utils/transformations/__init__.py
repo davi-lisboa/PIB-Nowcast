@@ -10,3 +10,12 @@ from .transform_pipeline import (
 )
 from .deflate import deflate
 from .outliers import remove_outliers
+
+def preprocess_data(df, specs_df, skip_seas_adj, fit_start_date, outlier_threshold):
+    """Executa todos os passos de pré-processamento de uma vez."""
+    df_clean = deflate(df, specs_df)
+    if not skip_seas_adj:
+        df_clean = seas_adj_stl_parallel(df_clean, specs_df)
+        
+    df_clean = make_stationary(df_clean, specs_df).loc[fit_start_date:, :]
+    return remove_outliers(df_clean, threshold=outlier_threshold)
