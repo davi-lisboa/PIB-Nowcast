@@ -426,3 +426,6 @@ deep_research_output*.txt
 *.txt
 !requirements.txt
 !pytest.ini
+
+
+*.ps1

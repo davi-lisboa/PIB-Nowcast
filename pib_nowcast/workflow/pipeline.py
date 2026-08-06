@@ -33,6 +33,7 @@ old_full_data = pd.read_excel(LAST_DATA, sheet_name='full_dataset', index_col='D
 
 ## Coleta dados mais recentes
 new_full_data = get_data_parallel(specs_df, start_date)
+
 # Reordenar as colunas para evitar erros no apply do statsmodels
 old_full_data = old_full_data.reindex(columns=new_full_data.columns)
 new_full_data = new_full_data.reindex(columns=old_full_data.columns)
@@ -113,9 +114,9 @@ old_model_base = DynamicFactorMQ(
         'Sentiment': 1,
         'Credit': 1
     }
+)
     # factor_orders = 1
         # ('Global', 'Output', 'Employment', 'Prices', 'Sentiment', 'Credit'): 4
-)
 # 'Global': 1,
 # ('Output', 'Employment', 'Prices', 'Sentiment', 'Credit'): 1,
 

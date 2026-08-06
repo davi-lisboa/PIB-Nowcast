@@ -21,6 +21,20 @@ O pipeline do projeto foi construído para ser modular, automatizado e orientado
 3. **Tratamento:** Limpeza de sazonalidade via X-13 e aplicação das transformações estabilizadoras e de variância (via wrapper `make_stationary`).
 4. **Filtro de Kalman / Fator Dinâmico:** Estimação do modelo `DynamicFactorMQ` para extrair os componentes comuns e lidar com valores faltantes (ragged edges).
 
+## ▶️ Como rodar o pipeline
+
+Use o ambiente gerenciado pelo uv para executar o pipeline do projeto:
+
+```powershell
+uv run python pib_nowcast/workflow/pipeline.py
+```
+
+Ou, no Windows PowerShell, com o atalho criado:
+
+```powershell
+./scripts/run_pipeline.ps1
+```
+
 ## 🚀 Próximos Passos (To-Dos)
 
 - [ ] **Expansão de Variáveis:** Adicionar novos indicadores na especificação `series_spec.csv` (ex: mais variáveis de Mercado de Trabalho, Crédito, Comércio Exterior, Arrecadação) para garantir maior densidade para o Fator Global.

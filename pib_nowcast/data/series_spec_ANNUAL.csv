@@ -137,7 +137,6 @@ papelao_expedicao;ABPO12_PAPEL12;['Global', 'Output'];Monthly;0;"N/A";ipeadata;1
 icc_fgv;FGV12_ICSTCA12;['Global', 'Sentiment'];Monthly;1;"N/A";ipeadata;10
 icc_fgv_sit_atual;FGV12_ISACSTCA12;['Global', 'Sentiment'];Monthly;1;"N/A";ipeadata;10
 icc_fgv_expectativas;FGV12_IECSTCA12;['Global', 'Sentiment'];Monthly;1;"N/A";ipeadata;10
-pib;1620;['Global', 'Output'];Quarterly;1;1;sidra;16
 inadimplencia_livres_total;21085;['Global', 'Credit'];Monthly;0;"N/A";sgs;8
 inadimplencia_livres_PJ_total;21086;['Global', 'Credit'];Monthly;0;"N/A";sgs;8
 inadimplencia_livres_PJ_desconto_de_duplicatas_e_recebiveis;21087;['Global', 'Credit'];Monthly;0;"N/A";sgs;8
@@ -160,3 +159,4 @@ concessoes_livres_PF_credito_pessoal_nao_consignado_total;20666;['Global','Credi
 concessoes_livres_PF_credito_pessoal_consignado_total;20671;['Global','Credit'];Monthly;0;"N/A";sgs;10
 concessoes_livres_PF_aquisicao_de_bens_total;20675;['Global','Credit'];Monthly;0;"N/A";sgs;10
 concessoes_livres_PF_cartao_de_credito_total;20682;['Global','Credit'];Monthly;0;"N/A";sgs;10
+pib;1620;['Global', 'Output'];Quarterly;1;1;sidra;17
