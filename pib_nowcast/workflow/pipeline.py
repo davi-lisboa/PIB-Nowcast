@@ -10,18 +10,18 @@ import matplotlib.pyplot as plt
 
 from statsmodels.tsa.api import DynamicFactorMQ
 
-from pib_nowcast.config import SERIES_SPEC, LAST_DATA, DATA_DIR, START_DATE, OUTLIER_THRESHOLD, RECESSIONS, MODEL_PARAMS_FILE, FIG_DIR
+from pib_nowcast.config import SERIES_SPEC, LAST_DATA, DATA_DIR, START_DATE, OUTLIER_THRESHOLD, RECESSIONS, MODEL_PARAMS_FILE, FIG_DIR, SKIP_SEAS_ADJ
 from pib_nowcast.utils.get_data import get_data, get_data_parallel
 from pib_nowcast.utils.transformations import seas_adj_stl_parallel, make_stationary, deflate, remove_outliers
 from pib_nowcast.utils.news import get_news_impacts, get_new_forecasts
-from pib_nowcast.utils.plots import plot_factors
+from pib_nowcast.utils.plots import plot_factors, plot_factors_vs_pib
 
 # %%
 
 ### Especifica caminho e primeira data
 specs_df = pd.read_csv(SERIES_SPEC, sep=';')
 start_date = START_DATE
-fit_start_date = '1996-01-01'
+fit_start_date = '2005-01-01'
 
 ### Especificação de datas
 today = dt.date.today()
@@ -34,8 +34,8 @@ old_full_data = pd.read_excel(LAST_DATA, sheet_name='full_dataset', index_col='D
 ## Coleta dados mais recentes
 new_full_data = get_data_parallel(specs_df, start_date)
 # Reordenar as colunas para evitar erros no apply do statsmodels
-old_full_data = old_full_data[new_full_data.columns]
-new_full_data = new_full_data[old_full_data.columns]
+old_full_data = old_full_data.reindex(columns=new_full_data.columns)
+new_full_data = new_full_data.reindex(columns=old_full_data.columns)
 
 new_full_data
 # %% Comparação
@@ -54,8 +54,13 @@ old_full_data_defl = deflate(old_full_data, specs_df)
 new_full_data_defl = deflate(new_full_data, specs_df)
 
 ## -> Ajuste sazonal
-old_full_data_sa = seas_adj_stl_parallel(old_full_data_defl, specs_df)
-new_full_data_sa = seas_adj_stl_parallel(new_full_data_defl, specs_df)
+if not SKIP_SEAS_ADJ:
+    old_full_data_sa = seas_adj_stl_parallel(old_full_data_defl, specs_df)
+    new_full_data_sa = seas_adj_stl_parallel(new_full_data_defl, specs_df)
+else:
+    print('[INFO] SKIP_SEAS_ADJ=True -> pulando STL (spec ANNUAL, transformações YoY/sdiff12 já removem sazonalidade).')
+    old_full_data_sa = old_full_data_defl.copy()
+    new_full_data_sa = new_full_data_defl.copy()
 
 ## -> Estacionarização
 old_full_data_stat = make_stationary(old_full_data_sa, specs_df)
@@ -68,7 +73,6 @@ new_full_data_stat = new_full_data_stat.loc[fit_start_date:, :]
 ## -> Remoção de Outliers
 old_full_data_stat = remove_outliers(old_full_data_stat, threshold=OUTLIER_THRESHOLD)
 new_full_data_stat = remove_outliers(new_full_data_stat, threshold=OUTLIER_THRESHOLD)
-
 
 # %% Separar datas e dfs relevantes do PIB (Antes da Limpeza de Memória)
 
@@ -100,15 +104,14 @@ old_model_base = DynamicFactorMQ(
     endog = old_full_data_stat,
     k_endog_monthly = specs_df.query("frequency == 'Monthly' ").shape[0],
     factors = factors,
-    factor_multiplicities={ 'Global': 2 },
+    factor_multiplicities={ 'Global': 1 },
     factor_orders = {
-        'Global': 4,
-        'Output': 3,
-        'Employment': 3,
-        'Prices': 3,
-        'Sentiment': 3,
-        # 'Credit': 3
-
+        'Global': 2,
+        'Output': 1,
+        'Employment': 1,
+        'Prices': 1,
+        'Sentiment': 1,
+        'Credit': 1
     }
     # factor_orders = 1
         # ('Global', 'Output', 'Employment', 'Prices', 'Sentiment', 'Credit'): 4
@@ -139,6 +142,7 @@ else:
 print(old_model.summary())
 
 plot_factors(old_model, factor_type='both', show_recessions=True, save_fig=True)
+plot_factors_vs_pib(old_model, pib_series=old_full_data_stat['pib'], save_fig=True)
 
 # %% Estimação do modelo com novos dados
 
@@ -150,6 +154,7 @@ new_model = old_model.apply(
 
 # %% Plot dos fatores
 plot_factors(new_model, factor_type='both', show_recessions=True, save_fig=True)
+plot_factors_vs_pib(new_model, pib_series=new_full_data_stat['pib'], save_fig=True)
 
 # %% Estimar news
 news = new_model.news(

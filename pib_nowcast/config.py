@@ -10,9 +10,15 @@ X13_PATH = PROJECT_ROOT / "x13as" / "x13as"
 FIG_DIR = PROJECT_ROOT / "pib_nowcast" / "figures"
 
 # SERIES_SPEC = DATA_DIR / "series_spec.csv"
-SERIES_SPEC = DATA_DIR / "series_spec_MONTHLY.csv"
+# SERIES_SPEC = DATA_DIR / "series_spec_MONTHLY.csv"
+SERIES_SPEC = DATA_DIR / "series_spec_ANNUAL.csv"
 LAST_DATA = DATA_DIR / "last_data_at_time.xlsx"
 MODEL_PARAMS_FILE = DATA_DIR / "dfm_params.csv"
+
+# Controle de ajuste sazonal baseado no tipo de especificação
+# Se a spec ativa usa transformações anuais (YoY, sdiff12, etc.),
+# o STL não deve ser aplicado para evitar dupla dessazonalização.
+SKIP_SEAS_ADJ = 'ANNUAL' in SERIES_SPEC.stem.upper()
 
 # Parâmetros Globais
 START_DATE = '1996-01-01'

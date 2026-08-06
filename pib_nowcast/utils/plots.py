@@ -60,3 +60,83 @@ def plot_factors(model, factor_type='both', show_recessions=True, save_fig=False
         fig.savefig(FIG_DIR / f'fatores_{now}.png', dpi=300)
         
     return fig, ax
+
+
+def plot_factors_vs_pib(model, pib_series, factor_names=None, show_recessions=True, save_fig=False):
+    """Plota fatores (smoothed) vs PIB observado (transformado) em eixos duplos.
+    
+    Parâmetros:
+    - model: Objeto do modelo estimado contendo os fatores.
+    - pib_series: pd.Series com o PIB já transformado (e.g. YoY%, QoQ%).
+    - factor_names: Lista de nomes dos fatores a plotar. Default: ['Global', 'Output'].
+    - show_recessions: Booleano indicando se deve mostrar as recessões.
+    - save_fig: Booleano indicando se deve salvar a figura no FIG_DIR.
+    """
+    import numpy as np
+
+    if factor_names is None:
+        factor_names = ['Global', 'Output']
+    
+    smoothed_factors = model.factors['smoothed']
+    
+    # Identificar colunas que correspondem a cada fator solicitado
+    factor_cols = {}
+    for name in factor_names:
+        matching = [c for c in smoothed_factors.columns if c == name or c.startswith(f'{name}.')]
+        if matching:
+            # Usa o primeiro (e.g. 'Global' ou 'Global.1')
+            factor_cols[name] = matching[0]
+    
+    if not factor_cols:
+        print(f"[WARN] Nenhum dos fatores {factor_names} encontrado nas colunas: {list(smoothed_factors.columns)}")
+        return None, None
+    
+    n_plots = len(factor_cols)
+    fig, axes = plt.subplots(1, n_plots, figsize=(7 * n_plots, 5), dpi=300)
+    
+    if n_plots == 1:
+        axes = [axes]
+    
+    # PIB como série trimestral (pode ter NaNs nas datas mensais)
+    pib = pib_series.dropna()
+    
+    for i, (label, col_name) in enumerate(factor_cols.items()):
+        ax1 = axes[i]
+        factor_data = smoothed_factors[col_name]
+        
+        # Plot do fator (eixo esquerdo)
+        color_factor = '#2563EB'
+        ax1.plot(factor_data.index, factor_data, color=color_factor, linewidth=1.2, alpha=0.85, label=f'Fator {label} (smoothed)')
+        ax1.set_ylabel(f'Fator {label}', color=color_factor)
+        ax1.tick_params(axis='y', labelcolor=color_factor)
+        
+        # Plot do PIB (eixo direito)
+        ax2 = ax1.twinx()
+        color_pib = '#DC2626'
+        ax2.plot(pib.index, pib.values, color=color_pib, linewidth=1.5, alpha=0.9, label='PIB observado', marker='o', markersize=2)
+        ax2.set_ylabel('PIB (transformado)', color=color_pib)
+        ax2.tick_params(axis='y', labelcolor=color_pib)
+        
+        # Calcular correlação no período comum
+        common_idx = factor_data.dropna().index.intersection(pib.index)
+        if len(common_idx) > 5:
+            corr = np.corrcoef(factor_data.loc[common_idx].values, pib.loc[common_idx].values)[0, 1]
+            ax1.set_title(f'{label} vs PIB  |  ρ = {corr:.3f}')
+        else:
+            ax1.set_title(f'{label} vs PIB')
+        
+        # Legendas combinadas
+        lines1, labels1 = ax1.get_legend_handles_labels()
+        lines2, labels2 = ax2.get_legend_handles_labels()
+        ax1.legend(lines1 + lines2, labels1 + labels2, loc='upper left', fontsize=8)
+        
+        if show_recessions:
+            _add_recessions(RECESSIONS, ax1)
+    
+    fig.tight_layout()
+    
+    if save_fig:
+        now = dt.datetime.now().strftime('%Y-%m-%d_%Hh%Mm%Ss')
+        fig.savefig(FIG_DIR / f'fatores_vs_pib_{now}.png', dpi=300)
+    
+    return fig, axes
