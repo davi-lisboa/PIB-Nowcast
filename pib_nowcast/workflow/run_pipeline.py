@@ -56,9 +56,11 @@ def main():
         for k, v in specs.set_index('variable')['factors'].to_dict().items()
     }
 
+    k_endog_monthly = specs.query("frequency == 'Monthly'").shape[0]
+
     base_model = DynamicFactorMQ(
         endog=old_clean,
-        k_endog_monthly=specs.query("frequency == 'Monthly'").shape[0],
+        k_endog_monthly=k_endog_monthly,
         factors=factors,
         factor_multiplicities={'Global': 1},
         factor_orders={'Global': 2, 'Output': 1, 'Employment': 1, 'Prices': 1, 'Sentiment': 1, 'Credit': 1}
@@ -74,7 +76,9 @@ def main():
             old_model.params.to_csv(MODEL_PARAMS_FILE)
 
     # Modelo com dados novos (apenas apply)
-    new_model = old_model.apply(endog=new_clean, k_endog_monthly=base_model.k_endog_monthly)
+    new_model = old_model.apply(endog=new_clean, k_endog_monthly=k_endog_monthly)
+
+    print(new_model.summary(display_diagnostics=True))
 
     # Gráficos
     plot_factors(new_model, factor_type='both', show_recessions=True, save_fig=True)

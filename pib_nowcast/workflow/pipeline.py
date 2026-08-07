@@ -101,11 +101,14 @@ factors = {
     for k, v in factors.items()
 }
 
+k_endog_monthly = min(new_full_data_stat.shape[1], 
+                      specs_df.query("frequency == 'Monthly' ").shape[0])
+
 old_model_base = DynamicFactorMQ(
     endog = old_full_data_stat,
-    k_endog_monthly = specs_df.query("frequency == 'Monthly' ").shape[0],
+    k_endog_monthly = k_endog_monthly,
     factors = factors,
-    factor_multiplicities={ 'Global': 1 },
+    factor_multiplicities={ 'Global': 2 },
     factor_orders = {
         'Global': 2,
         'Output': 1,
@@ -149,9 +152,9 @@ plot_factors_vs_pib(old_model, pib_series=old_full_data_stat['pib'], save_fig=Tr
 
 new_model = old_model.apply(
     endog = new_full_data_stat,
-    k_endog_monthly = specs_df.query("frequency == 'Monthly' ").shape[0],
+    k_endog_monthly = k_endog_monthly,
 
-)
+                        )
 
 # %% Plot dos fatores
 plot_factors(new_model, factor_type='both', show_recessions=True, save_fig=True)
