@@ -255,6 +255,7 @@ def get_impacts(news, specs, save_to: str | None = None) -> None:
                 k: ast.literal_eval(v) if isinstance(v, str) else v
                 for k, v in factors.items()
             }
+    factors = {k: v[1] for k, v in factors.items()}
 
     impacts = (
             news
