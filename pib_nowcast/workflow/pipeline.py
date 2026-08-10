@@ -13,7 +13,7 @@ from statsmodels.tsa.api import DynamicFactorMQ
 from pib_nowcast.config import SERIES_SPEC, LAST_DATA, DATA_DIR, START_DATE, OUTLIER_THRESHOLD, RECESSIONS, MODEL_PARAMS_FILE, FIG_DIR, SKIP_SEAS_ADJ
 from pib_nowcast.utils.get_data import get_data, get_data_parallel
 from pib_nowcast.utils.transformations import seas_adj_stl_parallel, make_stationary, deflate, remove_outliers
-from pib_nowcast.utils.news import get_news_impacts, get_new_forecasts
+from pib_nowcast.utils.news import get_news_impacts, get_impacts, get_new_forecasts, get_new_forecasts_annual
 from pib_nowcast.utils.plots import plot_factors, plot_factors_vs_pib
 
 # %%
@@ -178,16 +178,27 @@ export = True
 
 if export:
     ## -> Salvar impactos no histórico
-    get_news_impacts(news, save_to=DATA_DIR / 'news_impacts.xlsx')
+    # get_news_impacts(news, save_to=DATA_DIR / 'news_impacts.xlsx')
+    get_impacts(news, specs=specs_df, save_to=DATA_DIR / 'impacts.xlsx')
 
+    if not SKIP_SEAS_ADJ:
+        ## -> Salvar novos forecasts no histórico
+        forecasts_df = get_new_forecasts(
+            news=news, 
+            new_model_res=new_model, 
+            last_pib_date_timestamp=last_pib_date_timestamp, 
+            next_pib_quarter_timestamp=next_pib_quarter_timestamp, 
+            historical_pib_index=pib_series,
+            save_to=DATA_DIR / 'forecasts.xlsx'
+        )
 
-    ## -> Salvar novos forecasts no histórico
-    forecasts_df = get_new_forecasts(
-        news=news, 
-        new_model_res=new_model, 
-        last_pib_date_timestamp=last_pib_date_timestamp, 
-        next_pib_quarter_timestamp=next_pib_quarter_timestamp, 
-        historical_pib_index=pib_series,
-        save_to=DATA_DIR / 'forecasts.xlsx'
-    )
-
+    else:
+        ## -> Salvar novos forecasts no histórico
+        forecasts_df = get_new_forecasts_annual(
+            news=news, 
+            new_model_res=new_model, 
+            last_pib_date_timestamp=last_pib_date_timestamp, 
+            next_pib_quarter_timestamp=next_pib_quarter_timestamp, 
+            historical_pib_index=pib_series,
+            save_to=DATA_DIR / 'forecasts.xlsx'
+        )

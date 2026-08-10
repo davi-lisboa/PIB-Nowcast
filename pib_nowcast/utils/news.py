@@ -137,6 +137,71 @@ def get_new_forecasts(
             
     return all_forecasts_df
 
+
+def get_new_forecasts_annual(
+    news,
+    new_model_res,
+    last_pib_date_timestamp,
+    next_pib_quarter_timestamp,
+    save_to: str | None = None
+) -> pd.DataFrame:
+    """Extrai previsões YoY para series_spec ANNUAL e salva historicamente."""
+    today = dt.date.today()
+
+    new_point_forecasts = (
+        news
+        .impacts
+        [['estimate (new)']]
+        .reset_index()
+        .assign(
+            update_date=today,
+            estimate='predicted_mean',
+            type='yoy'
+        )
+        .rename(columns={
+            'impact date': 'reference date',
+            'estimate (new)': 'forecast'
+        })
+    )
+
+    new_interval_forecasts = (
+        new_model_res
+        .get_prediction(
+            start=last_pib_date_timestamp,
+            end=next_pib_quarter_timestamp,
+            dynamic=False,
+            information_set='predicted'
+        )
+        .conf_int()
+        .loc[[next_pib_quarter_timestamp], ['lower pib', 'upper pib']]
+        .reset_index()
+        .rename(columns={
+            'index': 'reference date',
+            'Date': 'reference date',
+            'lower pib': 'lower',
+            'upper pib': 'upper',
+        })
+        .melt(id_vars='reference date', var_name='estimate', value_name='forecast')
+        .assign(
+            impacted_variable='pib',
+            update_date=today,
+            type='yoy'
+        )
+    )
+
+    all_forecasts_df = pd.concat([new_point_forecasts, new_interval_forecasts], ignore_index=True)
+
+    if save_to:
+        if os.path.exists(save_to):
+            history_df = pd.read_excel(save_to)
+            final_df = pd.concat([history_df, all_forecasts_df], ignore_index=True)
+            final_df.to_excel(save_to, index=False)
+        else:
+            all_forecasts_df.to_excel(save_to, index=False)
+
+    return all_forecasts_df
+
+
 def get_factors_history(model_res, save_to: str | None = None) -> None:
     """Combina fatores smoothed e filtered, formatando para longo e salvando historicamente."""
     today = dt.date.today()
@@ -158,3 +223,58 @@ def get_factors_history(model_res, save_to: str | None = None) -> None:
             final_df.to_excel(save_to, index=False)
         else:
             factors_df.to_excel(save_to, index=False)
+
+
+
+def get_impacts(news, specs, save_to: str | None = None) -> None:
+    """Extrai os impactos de notícias do modelo e salva o histórico.
+
+    Parameters
+    ----------
+    news : object
+        Objeto de atualização do modelo contendo o atributo `details_by_impact`.
+    specs : pandas.DataFrame
+        Especificações das variáveis, com coluna `variable` e coluna `factors`.
+    save_to : str | None, optional
+        Caminho do arquivo Excel para salvar o histórico de impactos. Se `None`, não salva.
+
+    Returns
+    -------
+    None
+        A função grava o resultado em arquivo quando `save_to` é fornecido.
+    """
+
+    import ast
+    import pandas as pd
+    import datetime as dt
+
+    today = dt.date.today()
+
+    factors = specs.set_index('variable')['factors'].to_dict()
+    factors = {
+                k: ast.literal_eval(v) if isinstance(v, str) else v
+                for k, v in factors.items()
+            }
+
+    impacts = (
+            news
+            .details_by_impact
+            .droplevel(level=[0, 1], axis=0)
+            .reset_index('updated variable')
+            .assign(
+                    update_date=today,
+                    factor = lambda df: df['updated variable'].map(factors).fillna('Residuals')
+                    )
+          )
+
+    if save_to:
+            if os.path.exists(save_to):
+                # Se já existir um histórico, carrega, anexa e sobrescreve
+                history_df = pd.read_excel(save_to)
+                final_df = pd.concat([history_df, impacts], ignore_index=True)
+                final_df.to_excel(save_to, index=False)
+            else:
+                # Primeiro arquivo
+                impacts.to_excel(save_to, index=False)
+                
+    return impacts

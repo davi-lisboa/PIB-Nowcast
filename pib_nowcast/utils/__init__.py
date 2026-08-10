@@ -13,7 +13,7 @@ from pib_nowcast.utils.transformations import (
     make_stationary,
     deflate,
 )
-from pib_nowcast.utils.news import get_news_impacts, get_new_forecasts
+from pib_nowcast.utils.news import get_news_impacts, get_impacts, get_new_forecasts, get_new_forecasts_annual
 
 __all__ = [
     "get_data",
@@ -32,5 +32,7 @@ __all__ = [
     "make_stationary",
     "deflate",
     "get_news_impacts",
+    "get_impacts",
     "get_new_forecasts",
+    "get_new_forecasts_annual",
 ]
