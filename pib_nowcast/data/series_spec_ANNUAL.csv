@@ -52,32 +52,15 @@ pnadc_massa_salarial_habitual;28545;['Global', 'Employment'];Monthly;0;1;sgs;10
 renda_disponivel_familias_restrita;29028;['Global', 'Employment'];Monthly;1;1;sgs;10
 tx_desemprego;24369;['Global', 'Employment'];Monthly;0;"N/A";sgs;10
 ipca_alimentacao;1635;['Global', 'Prices'];Monthly;0;"N/A";sgs;8
-ipca_habitacao;1636;['Global', 'Prices'];Monthly;0;"N/A";sgs;8
-ipca_artigos_resid;1637;['Global', 'Prices'];Monthly;0;"N/A";sgs;8
-ipca_vestuario;1638;['Global', 'Prices'];Monthly;0;"N/A";sgs;8
-ipca_transportes;1639;['Global', 'Prices'];Monthly;0;"N/A";sgs;8
-ipca_saude;1641;['Global', 'Prices'];Monthly;0;"N/A";sgs;8
-ipca_despesas_pess;1642;['Global', 'Prices'];Monthly;0;"N/A";sgs;8
-ipca_educacao;1643;['Global', 'Prices'];Monthly;0;"N/A";sgs;8
-ipca_comunicacao;1640;['Global', 'Prices'];Monthly;0;"N/A";sgs;8
 ipca_alim_domicilio;27864;['Global', 'Prices'];Monthly;0;"N/A";sgs;8
 ipca_industriais;27863;['Global', 'Prices'];Monthly;0;"N/A";sgs;8
 ipca_servicos;10844;['Global', 'Prices'];Monthly;0;"N/A";sgs;8
 ipca_administrados;4449;['Global', 'Prices'];Monthly;0;"N/A";sgs;8
 ipca_livres;11428;['Global', 'Prices'];Monthly;0;"N/A";sgs;8
-ipca_nao_duraveis;10841;['Global', 'Prices'];Monthly;0;"N/A";sgs;8
-ipca_semi_duraveis;10842;['Global', 'Prices'];Monthly;0;"N/A";sgs;8
-ipca_duraveis;10843;['Global', 'Prices'];Monthly;0;"N/A";sgs;8
-ipca_comercializaveis;4447;['Global', 'Prices'];Monthly;0;"N/A";sgs;8
-ipca_nao_comercializaveis;4448;['Global', 'Prices'];Monthly;0;"N/A";sgs;8
 ipca_EX0;11427;['Global', 'Prices'];Monthly;0;"N/A";sgs;8
-ipca_EX1;16121;['Global', 'Prices'];Monthly;0;"N/A";sgs;8
-ipca_EX2;27838;['Global', 'Prices'];Monthly;0;"N/A";sgs;8
 ipca_EX3;27839;['Global', 'Prices'];Monthly;0;"N/A";sgs;8
-ipca_MA;11426;['Global', 'Prices'];Monthly;0;"N/A";sgs;8
 ipca_MS;4466;['Global', 'Prices'];Monthly;0;"N/A";sgs;8
 ipca_DP;16122;['Global', 'Prices'];Monthly;0;"N/A";sgs;8
-ipca_EXFE;28751;['Global', 'Prices'];Monthly;0;"N/A";sgs;8
 ipca_P55;28750;['Global', 'Prices'];Monthly;0;"N/A";sgs;8
 ipca_difusao;21379;['Global', 'Prices'];Monthly;0;"N/A";sgs;8
 ipca_industriais_subjacentes;29684;['Global', 'Prices'];Monthly;0;"N/A";sgs;8
@@ -159,4 +142,13 @@ concessoes_livres_PF_credito_pessoal_nao_consignado_total;20666;['Global','Credi
 concessoes_livres_PF_credito_pessoal_consignado_total;20671;['Global','Credit'];Monthly;0;"N/A";sgs;10
 concessoes_livres_PF_aquisicao_de_bens_total;20675;['Global','Credit'];Monthly;0;"N/A";sgs;10
 concessoes_livres_PF_cartao_de_credito_total;20682;['Global','Credit'];Monthly;0;"N/A";sgs;10
+cambio_media_mensal;3698;['Global', 'Prices'];Monthly;0;0;sgs;10
+icbr_agro;27575;['Global', 'Prices'];Monthly;0;"N/A";sgs;10
+icbr_metal;27576;['Global', 'Prices'];Monthly;0;"N/A";sgs;10
+icbr_energia;27577;['Global', 'Prices'];Monthly;0;"N/A";sgs;10
+pms_servicos_familias;21638;['Global', 'Output'];Monthly;0;0;sgs;10
+pms_tic;21639;['Global', 'Output'];Monthly;0;0;sgs;10
+pms_servicos_profissionais;21640;['Global', 'Output'];Monthly;0;0;sgs;10
+pms_transportes;21641;['Global', 'Output'];Monthly;0;0;sgs;10
+pms_outros;21642;['Global', 'Output'];Monthly;0;0;sgs;10
 pib;1620;['Global', 'Output'];Quarterly;1;1;sidra;17

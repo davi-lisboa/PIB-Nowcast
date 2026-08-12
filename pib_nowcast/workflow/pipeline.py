@@ -199,6 +199,6 @@ if export:
             new_model_res=new_model, 
             last_pib_date_timestamp=last_pib_date_timestamp, 
             next_pib_quarter_timestamp=next_pib_quarter_timestamp, 
-            historical_pib_index=pib_series,
+            # historical_pib_index=pib_series,
             save_to=DATA_DIR / 'forecasts.xlsx'
         )
