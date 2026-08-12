@@ -21,7 +21,7 @@ from pib_nowcast.utils.plots import plot_factors, plot_factors_vs_pib
 ### Especifica caminho e primeira data
 specs_df = pd.read_csv(SERIES_SPEC, sep=';')
 start_date = START_DATE
-fit_start_date = '2005-01-01'
+fit_start_date = '2002-01-01'
 
 ### Especificação de datas
 today = dt.date.today()
@@ -101,7 +101,7 @@ factors = {
     for k, v in factors.items()
 }
 
-k_endog_monthly = min(new_full_data_stat.shape[1], 
+k_endog_monthly = min(new_full_data_stat.shape[1]-1, 
                       specs_df.query("frequency == 'Monthly' ").shape[0])
 
 old_model_base = DynamicFactorMQ(
@@ -110,16 +110,16 @@ old_model_base = DynamicFactorMQ(
     factors = factors,
     factor_multiplicities={ 'Global': 2 },
     factor_orders = {
-        'Global': 2,
+        'Global': 4,
         'Output': 1,
         'Employment': 1,
         'Prices': 1,
-        'Sentiment': 1,
         'Credit': 1
     }
 )
-    # factor_orders = 1
-        # ('Global', 'Output', 'Employment', 'Prices', 'Sentiment', 'Credit'): 4
+# 'Sentiment': 1
+# factor_orders = 1
+# ('Global', 'Output', 'Employment', 'Prices', 'Sentiment', 'Credit'): 4
 # 'Global': 1,
 # ('Output', 'Employment', 'Prices', 'Sentiment', 'Credit'): 1,
 
@@ -156,7 +156,7 @@ new_model = old_model.apply(
 
                         )
 
-# %% Plot dos fatores
+# Plot dos fatores
 plot_factors(new_model, factor_type='both', show_recessions=True, save_fig=True)
 plot_factors_vs_pib(new_model, pib_series=new_full_data_stat['pib'], save_fig=True)
 
@@ -202,3 +202,10 @@ if export:
             # historical_pib_index=pib_series,
             save_to=DATA_DIR / 'forecasts.xlsx'
         )
+# %%
+
+new_model.plot_coefficients_of_determination(method='individual', endog_labels=True, figsize=(24, 12))
+
+new_model.plot_coefficients_of_determination(method='joint', endog_labels=True, figsize=(24, 8));
+
+new_model.plot_diagnostics(variable=-1, lags=24, figsize=(18, 8));
