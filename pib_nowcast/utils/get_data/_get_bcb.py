@@ -49,6 +49,6 @@ def get_bcb_parallel(
     # Utilize sgs.async_get to fetch all series concurrently
     bcb_series = asyncio.run(sgs.async_get(series, start=start))
 
-        
+
     return bcb_series
 

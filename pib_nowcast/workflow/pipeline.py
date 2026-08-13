@@ -15,6 +15,7 @@ from pib_nowcast.utils.get_data import get_data, get_data_parallel
 from pib_nowcast.utils.transformations import seas_adj_stl_parallel, make_stationary, deflate, remove_outliers
 from pib_nowcast.utils.news import get_news_impacts, get_impacts, get_new_forecasts, get_new_forecasts_annual
 from pib_nowcast.utils.plots import plot_factors, plot_factors_vs_pib
+from pib_nowcast.utils.model_builder import build_dfm
 
 # %%
 
@@ -117,11 +118,12 @@ old_model_base = DynamicFactorMQ(
         'Credit': 1
     }
 )
-# 'Sentiment': 1
-# factor_orders = 1
-# ('Global', 'Output', 'Employment', 'Prices', 'Sentiment', 'Credit'): 4
-# 'Global': 1,
-# ('Output', 'Employment', 'Prices', 'Sentiment', 'Credit'): 1,
+
+# old_model_base = build_dfm(
+#     endog_data=old_full_data_stat,
+#     k_endog_monthly=k_endog_monthly,
+#     factors=factors
+# )
 
 refit = True
 save_params = True

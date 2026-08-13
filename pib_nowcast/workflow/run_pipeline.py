@@ -13,13 +13,14 @@ from pib_nowcast.utils.get_data import get_data_parallel
 from pib_nowcast.utils.transformations import preprocess_data
 from pib_nowcast.utils.news import get_news_impacts, get_new_forecasts, get_factors_history
 from pib_nowcast.utils.plots import plot_factors, plot_factors_vs_pib
+from pib_nowcast.utils.model_builder import build_dfm
 
 # --- CONFIGURAÇÕES DO USUÁRIO ---
 REFIT_MODEL = True
 SAVE_PARAMS = True
 EXPORT_RESULTS = True
 UPDATE_BASE_DATA = False
-FIT_START_DATE = '2005-01-01'
+FIT_START_DATE = '2002-01-01'
 # --------------------------------
 
 # %% Execução Principal
@@ -58,12 +59,10 @@ def main():
 
     k_endog_monthly = specs.query("frequency == 'Monthly'").shape[0]
 
-    base_model = DynamicFactorMQ(
-        endog=old_clean,
+    base_model = build_dfm(
+        endog_data=old_clean,
         k_endog_monthly=k_endog_monthly,
-        factors=factors,
-        factor_multiplicities={'Global': 1},
-        factor_orders={'Global': 2, 'Output': 1, 'Employment': 1, 'Prices': 1, 'Sentiment': 1, 'Credit': 1}
+        factors=factors
     )
 
     if MODEL_PARAMS_FILE.exists() and not REFIT_MODEL:
