@@ -76,6 +76,15 @@ def _qoq_annualized(s: pd.Series) -> pd.Series:
     """Variação percentual QoQ anualizada."""
     return s.pct_change(1).add(1).pow(4).sub(1).dropna() * 100
 
+def _log_diff_annualized_quarter(s: pd.Series) -> pd.Series:
+    """Log-Diferença trimestral anualizada."""
+    return np.log(s).diff(1).multiply(100).multiply(4)
+
+def _log_diff_annualized_month(s: pd.Series) -> pd.Series:
+    """Log-Diferença trimestral anualizada."""
+    return np.log(s).diff(1).multiply(100)
+
+
 
 # ── Registro de pipelines ──────────────────────────────────────────────────
 #
@@ -106,16 +115,19 @@ PIPELINE_REGISTRY: dict[int, tuple[str, list, bool]] = {
     13: ("mom_pct",            [_mom_pct],                   False),
     14: ("mom_pct_annual_rate", [_mom_pct_annual_rate],      False),
     15: ("yoy_pct_monthly",    [_yoy_pct_monthly],           False),
+    16: ("second_diff", [_diff, _diff], False),
+    17: ("log_second_diff", [_log, _diff, _diff], True), 
 
 
     # ── Trimestrais ──
-    16: ("qoq_pct",            [_qoq_pct],                   False),
-    17: ("yoy_pct",            [_yoy_pct_quarterly],         False),
-    18: ("sdiff4",             [_sdiff4],                    False),
-    19: ("sdiff4→diff",        [_sdiff4, _diff],             False),
-    20: ("log→sdiff4",         [_log, _sdiff4, _multiply_100], True),
-    21: ("log→sdiff4→diff",    [_log, _sdiff4, _multiply_100, _diff], True),
-    22: ("qoq_annualized",     [_qoq_annualized],           False),
+    18: ("qoq_pct",            [_qoq_pct],                   False),
+    19: ("yoy_pct",            [_yoy_pct_quarterly],         False),
+    20: ("sdiff4",             [_sdiff4],                    False),
+    21: ("sdiff4→diff",        [_sdiff4, _diff],             False),
+    22: ("log→sdiff4",         [_log, _sdiff4, _multiply_100], True),
+    23: ("log→sdiff4→diff",    [_log, _sdiff4, _multiply_100, _diff], True),
+    24: ("qoq_annualized",     [_qoq_annualized],           False),
+    25: ("log_diff_annualized", [_log_diff_annualized_quarter], True),
 }
 
 # Mapeamento nome → id (útil para lookups a partir do nome legível)
@@ -124,8 +136,11 @@ PIPELINE_NAME_TO_ID: dict[str, int] = {
 }
 
 # IDs válidos para cada frequência
-MONTHLY_PIPELINE_IDS: list[int] = list(range(0, 15+1))
-QUARTERLY_PIPELINE_IDS: list[int] = [0, 1, 2, 3, 16, 17, 18, 19, 20, 21, 22]
+MONTHLY_PIPELINE_IDS: list[int] = list(range(0, 17+1))
+QUARTERLY_PIPELINE_IDS: list[int] = [0, 1, 2, 3] + list(range(18, 25+1))
+
+QUARTERLY_YOY_LIKE_IDS: list[int] = [19, 22, 24, 25]
+QUARTERLY_QOQ_LIKE_IDS: list[int] = [18]
 
 
 def apply_transform_pipeline(

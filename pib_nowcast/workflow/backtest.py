@@ -17,12 +17,23 @@ from pib_nowcast.config import SERIES_SPEC, START_DATE, OUTLIER_THRESHOLD, DATA_
 from pib_nowcast.utils.get_data import get_data_parallel
 from pib_nowcast.utils.transformations import seas_adj_stl_parallel, make_stationary, deflate, remove_outliers
 from pib_nowcast.utils.model_builder import build_dfm
+from pib_nowcast.utils.transformations.transform_pipeline import QUARTERLY_YOY_LIKE_IDS, QUARTERLY_QOQ_LIKE_IDS
 
 # %% 1. Configurações do Backtest
 
 # Trimestres alvo e os meses nos quais a previsão será simulada.
 # 2025Q4 -> Data de Referência PIB: '2025-12-01'
 TARGETS = {
+    '2025Q3': {
+            'pib_date': pd.Timestamp('2025-09-01'),
+            'simulation_months': [
+                pd.Timestamp('2025-07-31'),
+                pd.Timestamp('2025-08-31'),
+                pd.Timestamp('2025-09-30'),
+                pd.Timestamp('2025-10-31'),
+                pd.Timestamp('2025-11-30'),
+            ]},
+
     '2025Q4': {
         'pib_date': pd.Timestamp('2025-12-01'),
         'simulation_months': [
@@ -155,13 +166,38 @@ for target_name, target_info in TARGETS.items():
             # Rodamos apenas o filtro (filter) e não o suavizador (smooth),
             # pois o suavizador aloca as gigantescas matrizes de covariância (predicted_cov) 
             # e causa o ArrayMemoryError. Para a projeção final (predict), o filtro basta!
-            model_res = model.filter(params)
+            try: model_res = model.smooth(params) 
+            except: model_res = model.filter(params)
             
             # Predict
             pred = model_res.predict(start=pib_target_date, end=pib_target_date)
             predicted_value = pred['pib'].iloc[0] if 'pib' in pred.columns and not pred.empty else np.nan
             
-            actual_value = full_data_raw.loc[pib_target_date, 'pib'] if pib_target_date in full_data_raw.index else np.nan
+            # actual_value = full_data_raw.loc[pib_target_date, 'pib'] if pib_target_date in full_data_raw.index else np.nan
+
+            if pib_target_date in full_data_raw.index:
+                pib_t_id = specs_df.query('variable == "pib"')['transformation_id'].iloc[0]
+                if pib_t_id in QUARTERLY_QOQ_LIKE_IDS:
+                    actual_value = (
+                                    full_data_raw
+                                    .loc[:, ['pib']]
+                                    .dropna()
+                                    .pct_change(1).multiply(100)
+                                    .loc[pib_target_date, :]
+                                )
+                
+                elif pib_t_id in QUARTERLY_YOY_LIKE_IDS:
+                    actual_value = (
+                                    full_data_raw
+                                    .loc[:, ['pib']]
+                                    .dropna()
+                                    .pct_change(4).multiply(100)
+                                    .loc[pib_target_date, :]
+                                )
+                # actual_value = full_data_raw.loc[pib_target_date, 'pib']
+
+            else:
+                actual_value = np.nan
             
             print(f"  => Predito: {predicted_value:.4f} | Realizado: {actual_value}")
             

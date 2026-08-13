@@ -1,6 +1,7 @@
 variable;code;factors;frequency;seas_adj;deflate;source;transformation_id
 concessoes_PJ_total;24440;['Global', 'Credit'];Monthly;1;0;sgs;3
 concessoes_PF_total;24441;['Global', 'Credit'];Monthly;1;0;sgs;13
+concessoes_livres_total;20634;['Global', 'Credit'];Monthly;0;0;sgs;11
 concessoes_livres_PJ_total;24443;['Global', 'Credit'];Monthly;1;0;sgs;13
 concessoes_livres_PF_total;24444;['Global', 'Credit'];Monthly;1;0;sgs;13
 concessoes_direcionados_PJ_total;24446;['Global', 'Credit'];Monthly;1;0;sgs;1
@@ -9,7 +10,6 @@ selic_mensal;4189;['Global', 'Credit'];Monthly;0;N/A;sgs;1
 inadimplencia_livres_total;21085;['Global', 'Credit'];Monthly;0;N/A;sgs;1
 inadimplencia_livres_PJ_total;21086;['Global', 'Credit'];Monthly;0;N/A;sgs;1
 inadimplencia_livres_PF_total;21112;['Global', 'Credit'];Monthly;0;N/A;sgs;1
-concessoes_livres_total;20634;['Global', 'Credit'];Monthly;0;0;sgs;11
 caged_estoque_agro;28785;['Global', 'Employment'];Monthly;1;N/A;sgs;3
 caged_estoque_ind_extrativa;28786;['Global', 'Employment'];Monthly;1;N/A;sgs;3
 caged_estoque_ind_transformacao;28787;['Global', 'Employment'];Monthly;1;N/A;sgs;13
@@ -122,4 +122,4 @@ cambio_media_mensal;3698;['Global', 'Prices'];Monthly;0;0;sgs;13
 icbr_agro;27575;['Global', 'Prices'];Monthly;0;N/A;sgs;13
 icbr_metal;27576;['Global', 'Prices'];Monthly;0;N/A;sgs;13
 icbr_energia;27577;['Global', 'Prices'];Monthly;0;N/A;sgs;13
-pib;1621;['Global', 'Output'];Quarterly;1;1;sidra;22
+pib;1621;['Global', 'Output'];Quarterly;1;1;sidra;18

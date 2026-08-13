@@ -125,8 +125,8 @@ old_model_base = DynamicFactorMQ(
 #     factors=factors
 # )
 
-refit = True
-save_params = True
+refit = False
+save_params = False
 
 # Se o arquivo de parâmetros existir, carrega e faz smooth
 if MODEL_PARAMS_FILE.exists() and not refit:
