@@ -184,6 +184,7 @@ for target_name, target_info in TARGETS.items():
                                     .dropna()
                                     .pct_change(1).multiply(100)
                                     .loc[pib_target_date, :]
+                                    .iloc[0]
                                 )
                 
                 elif pib_t_id in QUARTERLY_YOY_LIKE_IDS:
@@ -193,6 +194,7 @@ for target_name, target_info in TARGETS.items():
                                     .dropna()
                                     .pct_change(4).multiply(100)
                                     .loc[pib_target_date, :]
+                                    .iloc[0]
                                 )
                 # actual_value = full_data_raw.loc[pib_target_date, 'pib']
 

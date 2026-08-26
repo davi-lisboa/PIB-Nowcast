@@ -125,8 +125,8 @@ old_model_base = DynamicFactorMQ(
 #     factors=factors
 # )
 
-refit = False
-save_params = False
+refit = True
+save_params = True
 
 # Se o arquivo de parâmetros existir, carrega e faz smooth
 if MODEL_PARAMS_FILE.exists() and not refit:
@@ -206,8 +206,8 @@ if export:
         )
 # %%
 
-new_model.plot_coefficients_of_determination(method='individual', endog_labels=True, figsize=(24, 12))
+new_model.plot_coefficients_of_determination(method='individual', endog_labels=True, figsize=(24, 14))
 
 new_model.plot_coefficients_of_determination(method='joint', endog_labels=True, figsize=(24, 8));
 
-new_model.plot_diagnostics(variable=-1, lags=24, figsize=(18, 8));
+# new_model.plot_diagnostics(variable=-1, lags=24, figsize=(18, 8));
